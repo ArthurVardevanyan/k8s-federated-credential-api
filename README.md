@@ -15,9 +15,14 @@ go build -C cmd/kfcc -o /tmp/kfcc
 
 /tmp/kfcc
 
-curl -X POST \
+export JSON='{
+  "jwt": "'$(kubectl create token default --duration=1h -n default)'",
+  "namespace": "default",
+  "serviceAccount": "default"
+}'
+
+curl "http://localhost:8088/exchangeToken" -X POST \
   -H "Content-type: application/json" \
   -H "Accept: application/json" \
-  -d '{"jwt":"test","namespace":"test","serviceAccount":"test"}' \
-  "http://localhost:8088/exchangeToken"
+  -d "${JSON}"
 ```
