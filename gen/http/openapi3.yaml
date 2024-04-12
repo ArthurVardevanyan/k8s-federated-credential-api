@@ -21,7 +21,7 @@ paths:
                         example:
                             jwt: Vel et ipsam.
                             namespace: Ex iure voluptas in et similique.
-                            serviceAccount: Architecto tenetur ipsam non est non aut.
+                            serviceAccountName: Architecto tenetur ipsam non est non aut.
             responses:
                 "200":
                     description: OK response.
@@ -44,14 +44,14 @@ components:
                     type: string
                     description: The target namespace for impersonation
                     example: Ullam consequuntur voluptatem est laborum.
-                serviceAccount:
+                serviceAccountName:
                     type: string
                     description: The target serviceAccount
                     example: Vitae ipsum vitae adipisci.
             example:
                 jwt: Aut illo nostrum.
                 namespace: Et voluptas similique repellendus est.
-                serviceAccount: Iure incidunt reiciendis est animi vero vel.
+                serviceAccountName: Iure incidunt reiciendis est animi vero vel.
 tags:
     - name: tokenExchange
       description: Exchange an incoming Kubernetes Token for Another Kubernetes Token

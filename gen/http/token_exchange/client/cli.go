@@ -21,13 +21,13 @@ func BuildExchangeTokenPayload(tokenExchangeExchangeTokenBody string) (*tokenexc
 	{
 		err = json.Unmarshal([]byte(tokenExchangeExchangeTokenBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"jwt\": \"Vel et ipsam.\",\n      \"namespace\": \"Ex iure voluptas in et similique.\",\n      \"serviceAccount\": \"Architecto tenetur ipsam non est non aut.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"jwt\": \"Vel et ipsam.\",\n      \"namespace\": \"Ex iure voluptas in et similique.\",\n      \"serviceAccountName\": \"Architecto tenetur ipsam non est non aut.\"\n   }'")
 		}
 	}
 	v := &tokenexchange.ExchangeTokenPayload{
-		JWT:            body.JWT,
-		Namespace:      body.Namespace,
-		ServiceAccount: body.ServiceAccount,
+		JWT:                body.JWT,
+		Namespace:          body.Namespace,
+		ServiceAccountName: body.ServiceAccountName,
 	}
 
 	return v, nil

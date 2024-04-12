@@ -41,5 +41,5 @@ type ExchangeTokenPayload struct {
 	// The target namespace for impersonation
 	Namespace *string
 	// The target serviceAccount
-	ServiceAccount *string
+	ServiceAccountName *string
 }

@@ -45,11 +45,11 @@ definitions:
                 type: string
                 description: The target namespace for impersonation
                 example: Similique voluptas ut perspiciatis exercitationem pariatur aut.
-            serviceAccount:
+            serviceAccountName:
                 type: string
                 description: The target serviceAccount
                 example: Aut et rem dicta.
         example:
             jwt: Consequatur adipisci.
             namespace: Sit voluptatem.
-            serviceAccount: Quia facilis.
+            serviceAccountName: Quia facilis.

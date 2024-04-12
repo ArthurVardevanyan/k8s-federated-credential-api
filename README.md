@@ -17,8 +17,8 @@ go build -C cmd/kfcc -o /tmp/kfcc
 
 export JSON='{
   "jwt": "'$(kubectl create token default --duration=1h -n default)'",
-  "namespace": "default",
-  "serviceAccount": "default"
+  "namespace": "smoke-tests",
+  "ServiceAccountName": "default"
 }'
 
 curl "http://localhost:8088/exchangeToken" -X POST \

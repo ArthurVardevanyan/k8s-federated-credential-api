@@ -16,7 +16,7 @@ var _ = Service("tokenExchange", func() {
 			// Attribute describes an object field
 			Field(0, "jwt", String, "The JWT Token from the impersonating service account")
 			Field(1, "namespace", String, "The target namespace for impersonation")
-			Field(2, "serviceAccount", String, "The target serviceAccount")
+			Field(2, "serviceAccountName", String, "The target serviceAccount")
 			//Required("jwt", "namespace", "serviceAccount" )
 		})
 		// Result describes the method result

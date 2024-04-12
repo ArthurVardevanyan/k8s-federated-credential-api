@@ -19,16 +19,16 @@ type ExchangeTokenRequestBody struct {
 	// The target namespace for impersonation
 	Namespace *string `form:"namespace,omitempty" json:"namespace,omitempty" xml:"namespace,omitempty"`
 	// The target serviceAccount
-	ServiceAccount *string `form:"serviceAccount,omitempty" json:"serviceAccount,omitempty" xml:"serviceAccount,omitempty"`
+	ServiceAccountName *string `form:"serviceAccountName,omitempty" json:"serviceAccountName,omitempty" xml:"serviceAccountName,omitempty"`
 }
 
 // NewExchangeTokenPayload builds a tokenExchange service exchangeToken
 // endpoint payload.
 func NewExchangeTokenPayload(body *ExchangeTokenRequestBody) *tokenexchange.ExchangeTokenPayload {
 	v := &tokenexchange.ExchangeTokenPayload{
-		JWT:            body.JWT,
-		Namespace:      body.Namespace,
-		ServiceAccount: body.ServiceAccount,
+		JWT:                body.JWT,
+		Namespace:          body.Namespace,
+		ServiceAccountName: body.ServiceAccountName,
 	}
 
 	return v

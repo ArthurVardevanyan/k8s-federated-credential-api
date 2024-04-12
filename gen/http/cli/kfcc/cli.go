@@ -31,7 +31,7 @@ func UsageExamples() string {
 	return os.Args[0] + ` token-exchange exchange-token --body '{
       "jwt": "Vel et ipsam.",
       "namespace": "Ex iure voluptas in et similique.",
-      "serviceAccount": "Architecto tenetur ipsam non est non aut."
+      "serviceAccountName": "Architecto tenetur ipsam non est non aut."
    }'` + "\n" +
 		""
 }
@@ -153,7 +153,7 @@ Example:
     %[1]s token-exchange exchange-token --body '{
       "jwt": "Vel et ipsam.",
       "namespace": "Ex iure voluptas in et similique.",
-      "serviceAccount": "Architecto tenetur ipsam non est non aut."
+      "serviceAccountName": "Architecto tenetur ipsam non est non aut."
    }'
 `, os.Args[0])
 }
