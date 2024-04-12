@@ -40,12 +40,12 @@ func (s *tokenExchangesrvc) ExchangeToken(ctx context.Context, p *tokenexchange.
 	// creates the in-cluster config
 	config, err := rest.InClusterConfig()
 	if err != nil {
-		panic(err.Error())
+		return err.Error(), err
 	}
 	// creates the clientSet
 	clientSet, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		panic(err.Error())
+		return err.Error(), err
 	}
 
 	serviceAccount, err := clientSet.CoreV1().ServiceAccounts(*p.Namespace).Get(ctx, *p.ServiceAccountName, metav1.GetOptions{})
@@ -67,7 +67,8 @@ func (s *tokenExchangesrvc) ExchangeToken(ctx context.Context, p *tokenexchange.
 
 			provider, err := oidc.NewProvider(ctx, serviceAccountInfo.Issuer)
 			if err != nil {
-				log.Fatal(err)
+				continue
+				// return "Unable to Reach Bucket:", err
 			}
 
 			oidcConfig := &oidc.Config{
@@ -75,19 +76,43 @@ func (s *tokenExchangesrvc) ExchangeToken(ctx context.Context, p *tokenexchange.
 			}
 			verifier := provider.Verifier(oidcConfig)
 
-			_, err = verifier.Verify(ctx, *p.JWT)
+			idToken, err := verifier.Verify(ctx, *p.JWT)
 			if err != nil {
-				return "Failed to parse the JWT.\nError: %s", err
+				continue
+				// return "Failed to parse the JWT.\nError: %s", err
 			}
 
-			const tokenExpirationSeconds = 3600
-			tokenRequest := kubernetesAuthToken(tokenExpirationSeconds)
-			token, err := clientSet.CoreV1().ServiceAccounts(*p.Namespace).CreateToken(ctx, *p.ServiceAccountName, tokenRequest, metav1.CreateOptions{})
-			if err != nil {
-				return "Failed to create token: %v", err
+			// Extract claims from the ID token
+			var claims struct {
+				Aud        []string `json:"aud"`
+				Exp        int      `json:"exp"`
+				Iat        int      `json:"iat"`
+				Iss        string   `json:"iss"`
+				Kubernetes struct {
+					Namespace      string `json:"namespace"`
+					ServiceAccount struct {
+						Name string `json:"name"`
+						UID  string `json:"uid"`
+					} `json:"serviceaccount"`
+				} `json:"kubernetes.io"`
+				Nbf int    `json:"nbf"`
+				Sub string `json:"sub"`
+			}
+			if err := idToken.Claims(&claims); err != nil {
+				continue
+				// return "Failed to extract claims: %v", err
 			}
 
-			return token.Status.Token, nil
+			if claims.Iss == serviceAccountInfo.Issuer && claims.Kubernetes.Namespace == serviceAccountInfo.Namespace && claims.Kubernetes.ServiceAccount.Name == serviceAccountInfo.ServiceAccountName {
+				const tokenExpirationSeconds = 3600
+				tokenRequest := kubernetesAuthToken(tokenExpirationSeconds)
+				token, err := clientSet.CoreV1().ServiceAccounts(*p.Namespace).CreateToken(ctx, *p.ServiceAccountName, tokenRequest, metav1.CreateOptions{})
+				if err != nil {
+					return "Failed to create token: %v", err
+				}
+
+				return token.Status.Token, nil
+			}
 		}
 	}
 

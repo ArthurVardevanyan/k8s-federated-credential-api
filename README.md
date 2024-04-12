@@ -11,10 +11,14 @@ go mod init kubernetes-federated-credential-controller
 ~/go/bin/goa gen kubernetes-federated-credential-controller/design
 ~/go/bin/goa example kubernetes-federated-credential-controller/design
 
-go build -C cmd/kfcc -o /tmp/kfcc
+go build -C cmd/kfcc -o /tmp/kfcc && /tmp/kfcc
+```
 
-/tmp/kfcc
+Requesting a token for remote kubernetes service account.
 
+Example of target service account annotation can be found in `examples/example.yaml`
+
+```bash
 export JSON='{
   "jwt": "'$(kubectl create token default --duration=1h -n default)'",
   "namespace": "smoke-tests",
