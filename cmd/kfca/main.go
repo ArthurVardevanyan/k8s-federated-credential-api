@@ -4,8 +4,8 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	tokenexchange "kubernetes-federated-credential-controller/gen/token_exchange"
-	kfcc "kubernetes-federated-credential-controller/internal"
+	tokenexchange "k8s-federated-credential-api/gen/token_exchange"
+	kfca "k8s-federated-credential-api/internal"
 	"log"
 	"net"
 	"net/url"
@@ -32,7 +32,7 @@ func main() {
 		logger *log.Logger
 	)
 	{
-		logger = log.New(os.Stderr, "[kfcc] ", log.Ltime)
+		logger = log.New(os.Stderr, "[kfca] ", log.Ltime)
 	}
 
 	// Initialize the services.
@@ -40,7 +40,7 @@ func main() {
 		tokenExchangeSvc tokenexchange.Service
 	)
 	{
-		tokenExchangeSvc = kfcc.NewTokenExchange(logger)
+		tokenExchangeSvc = kfca.NewTokenExchange(logger)
 	}
 
 	// Wrap the services in endpoints that can be invoked from other services

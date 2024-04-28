@@ -1,9 +1,9 @@
-package kfcc
+package kfca
 
 import (
 	"context"
 	"encoding/json"
-	tokenexchange "kubernetes-federated-credential-controller/gen/token_exchange"
+	tokenexchange "k8s-federated-credential-api/gen/token_exchange"
 	"log"
 	"strings"
 

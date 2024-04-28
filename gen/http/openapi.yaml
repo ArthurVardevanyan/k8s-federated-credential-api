@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
     title: ""
-    description: The Kubernetes Federated Credential Controller
+    description: The Kubernetes Federated Credential Api
     version: 0.0.1
 host: localhost:8088
 consumes:
@@ -40,16 +40,16 @@ definitions:
             jwt:
                 type: string
                 description: The JWT Token from the impersonating service account
-                example: Ullam voluptas ut nemo.
+                example: Ut et itaque quod.
             namespace:
                 type: string
                 description: The target namespace for impersonation
-                example: Similique voluptas ut perspiciatis exercitationem pariatur aut.
+                example: Deleniti qui.
             serviceAccountName:
                 type: string
                 description: The target serviceAccount
-                example: Aut et rem dicta.
+                example: Ex deleniti.
         example:
-            jwt: Consequatur adipisci.
-            namespace: Sit voluptatem.
-            serviceAccountName: Quia facilis.
+            jwt: Neque occaecati distinctio nihil ut.
+            namespace: Consectetur est non ducimus fuga.
+            serviceAccountName: Neque commodi.

@@ -1,7 +1,7 @@
 package main
 
 import (
-	cli "kubernetes-federated-credential-controller/gen/http/cli/kfcc"
+	cli "k8s-federated-credential-api/gen/http/cli/kfca"
 	"net/http"
 	"time"
 

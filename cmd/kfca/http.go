@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	tokenexchangesvr "kubernetes-federated-credential-controller/gen/http/token_exchange/server"
-	tokenexchange "kubernetes-federated-credential-controller/gen/token_exchange"
+	tokenexchangesvr "k8s-federated-credential-api/gen/http/token_exchange/server"
+	tokenexchange "k8s-federated-credential-api/gen/token_exchange"
 	"log"
 	"net/http"
 	"net/url"
