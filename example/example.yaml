@@ -4,5 +4,5 @@ metadata:
   name: default
   namespace: smoke-tests
   annotations:
-    kfcc_1: '{ "issuer": "https://storage.googleapis.com/dne", "namespace": "smoke-tests", "serviceAccountName": "default"}'
-    kfcc_2: '{ "issuer": "https://storage.googleapis.com/okd-homelab-wif-oidc", "namespace": "default", "serviceAccountName": "default"}'
+    kfca_1: '{ "issuer": "https://storage.googleapis.com/dne", "namespace": "smoke-tests", "serviceAccountName": "default"}'
+    kfca_2: '{ "issuer": "https://storage.googleapis.com/okd-homelab-wif-oidc", "namespace": "default", "serviceAccountName": "default"}'

@@ -55,7 +55,7 @@ func (s *tokenExchangesrvc) ExchangeToken(ctx context.Context, p *tokenexchange.
 
 	annotations := serviceAccount.GetAnnotations()
 	for key, value := range annotations {
-		if strings.Contains(key, "kfcc") {
+		if strings.Contains(key, "kfca") {
 
 			jsonData := []byte(value)
 
@@ -67,6 +67,8 @@ func (s *tokenExchangesrvc) ExchangeToken(ctx context.Context, p *tokenexchange.
 
 			provider, err := oidc.NewProvider(ctx, serviceAccountInfo.Issuer)
 			if err != nil {
+				// If Log Level Debug
+				//println(err.Error())
 				continue
 				// return "Unable to Reach Bucket:", err
 			}
@@ -78,6 +80,8 @@ func (s *tokenExchangesrvc) ExchangeToken(ctx context.Context, p *tokenexchange.
 
 			idToken, err := verifier.Verify(ctx, *p.JWT)
 			if err != nil {
+				// If Log Level Debug
+				//println(err.Error())
 				continue
 				// return "Failed to parse the JWT.\nError: %s", err
 			}
@@ -112,6 +116,9 @@ func (s *tokenExchangesrvc) ExchangeToken(ctx context.Context, p *tokenexchange.
 				}
 
 				return token.Status.Token, nil
+			} else {
+				// If Log Level Debug
+				//println(claims.Iss + " " + serviceAccountInfo.Issuer + " " + claims.Kubernetes.Namespace + " " + serviceAccountInfo.Namespace + " " + claims.Kubernetes.ServiceAccount.Name + " " + serviceAccountInfo.ServiceAccountName)
 			}
 		}
 	}

@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: k8s-federated-credential-api
+  annotations:
+    checkov.io/skip1: CKV_K8S_40=OpenShift Injects Random UID
+    checkov.io/skip2: CKV_K8S_38=Operator Requires use of Tokens
+  name: k8s-federated-credential-api-manager
+  namespace: k8s-federated-credential-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: k8s-federated-credential-api
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/default-container: manager
+      labels:
+        app: k8s-federated-credential-api
+    spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - image: ""
+          name: k8s-federated-credential-api
+          ports:
+            - containerPort: 8088
+              name: http
+              protocol: TCP
+          # livenessProbe:
+          #   httpGet:
+          #     path: /healthz
+          #     port: 8081
+          #   initialDelaySeconds: 15
+          #   periodSeconds: 20
+          # readinessProbe:
+          #   httpGet:
+          #     path: /readyz
+          #     port: 8081
+          #   initialDelaySeconds: 5
+          #   periodSeconds: 10
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 10m
+              memory: 64Mi
+          securityContext:
+            runAsNonRoot: true
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+              drop:
+                - ALL
+      serviceAccountName: k8s-federated-credential-api
+      terminationGracePeriodSeconds: 10
+      automountServiceAccountToken: true

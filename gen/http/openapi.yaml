@@ -3,7 +3,7 @@ info:
     title: ""
     description: The Kubernetes Federated Credential Api
     version: 0.0.1
-host: localhost:8088
+host: 0.0.0.0:8088
 consumes:
     - application/json
     - application/xml

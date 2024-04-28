@@ -8,6 +8,6 @@ var _ = API("kfca", func() {
 	Description("The Kubernetes Federated Credential Api")
 	Server("kfca", func() {
 		Services("tokenExchange")
-		Host("localhost", func() { URI("http://localhost:8088") })
+		Host("localhost", func() { URI("http://0.0.0.0:8088") })
 	})
 })
