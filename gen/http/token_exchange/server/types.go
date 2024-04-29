@@ -22,6 +22,29 @@ type ExchangeTokenRequestBody struct {
 	ServiceAccountName *string `form:"serviceAccountName,omitempty" json:"serviceAccountName,omitempty" xml:"serviceAccountName,omitempty"`
 }
 
+// ExchangeTokenResponseBody is the type of the "tokenExchange" service
+// "exchangeToken" endpoint HTTP response body.
+type ExchangeTokenResponseBody struct {
+	// The status information with a token
+	Status *StatusResponseBody `form:"status" json:"status" xml:"status"`
+}
+
+// StatusResponseBody is used to define fields on response body types.
+type StatusResponseBody struct {
+	// The status token
+	Token string `form:"token" json:"token" xml:"token"`
+}
+
+// NewExchangeTokenResponseBody builds the HTTP response body from the result
+// of the "exchangeToken" endpoint of the "tokenExchange" service.
+func NewExchangeTokenResponseBody(res *tokenexchange.StatusResult) *ExchangeTokenResponseBody {
+	body := &ExchangeTokenResponseBody{}
+	if res.Status != nil {
+		body.Status = marshalTokenexchangeStatusToStatusResponseBody(res.Status)
+	}
+	return body
+}
+
 // NewExchangeTokenPayload builds a tokenExchange service exchangeToken
 // endpoint payload.
 func NewExchangeTokenPayload(body *ExchangeTokenRequestBody) *tokenexchange.ExchangeTokenPayload {

@@ -10,6 +10,7 @@ package server
 import (
 	"context"
 	"io"
+	tokenexchange "k8s-federated-credential-api/gen/token_exchange"
 	"net/http"
 
 	goahttp "goa.design/goa/v3/http"
@@ -20,9 +21,9 @@ import (
 // tokenExchange exchangeToken endpoint.
 func EncodeExchangeTokenResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
 	return func(ctx context.Context, w http.ResponseWriter, v any) error {
-		res, _ := v.(string)
+		res, _ := v.(*tokenexchange.StatusResult)
 		enc := encoder(ctx, w)
-		body := res
+		body := NewExchangeTokenResponseBody(res)
 		w.WriteHeader(http.StatusOK)
 		return enc.Encode(body)
 	}
@@ -47,4 +48,14 @@ func DecodeExchangeTokenRequest(mux goahttp.Muxer, decoder func(*http.Request) g
 
 		return payload, nil
 	}
+}
+
+// marshalTokenexchangeStatusToStatusResponseBody builds a value of type
+// *StatusResponseBody from a value of type *tokenexchange.Status.
+func marshalTokenexchangeStatusToStatusResponseBody(v *tokenexchange.Status) *StatusResponseBody {
+	res := &StatusResponseBody{
+		Token: v.Token,
+	}
+
+	return res
 }

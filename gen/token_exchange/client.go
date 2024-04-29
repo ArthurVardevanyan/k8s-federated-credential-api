@@ -27,11 +27,11 @@ func NewClient(exchangeToken goa.Endpoint) *Client {
 
 // ExchangeToken calls the "exchangeToken" endpoint of the "tokenExchange"
 // service.
-func (c *Client) ExchangeToken(ctx context.Context, p *ExchangeTokenPayload) (res string, err error) {
+func (c *Client) ExchangeToken(ctx context.Context, p *ExchangeTokenPayload) (res *StatusResult, err error) {
 	var ires any
 	ires, err = c.ExchangeTokenEndpoint(ctx, p)
 	if err != nil {
 		return
 	}
-	return ires.(string), nil
+	return ires.(*StatusResult), nil
 }

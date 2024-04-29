@@ -28,5 +28,5 @@ export JSON='{
 curl "http://localhost:8088/exchangeToken" -X POST \
   -H "Content-type: application/json" \
   -H "Accept: application/json" \
-  -d "${JSON}"
+  -d "${JSON}" | jq
 ```

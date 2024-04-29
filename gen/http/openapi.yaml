@@ -29,10 +29,25 @@ paths:
                 "200":
                     description: OK response.
                     schema:
-                        type: string
+                        $ref: '#/definitions/TokenExchangeExchangeTokenResponseBody'
+                        required:
+                            - status
             schemes:
                 - http
 definitions:
+    StatusResponseBody:
+        title: StatusResponseBody
+        type: object
+        properties:
+            token:
+                type: string
+                description: The status token
+                example: Harum et.
+        description: Status with a token.
+        example:
+            token: Ut et itaque quod.
+        required:
+            - token
     TokenExchangeExchangeTokenRequestBody:
         title: TokenExchangeExchangeTokenRequestBody
         type: object
@@ -40,16 +55,27 @@ definitions:
             jwt:
                 type: string
                 description: The JWT Token from the impersonating service account
-                example: Ut et itaque quod.
+                example: Deleniti qui.
             namespace:
                 type: string
                 description: The target namespace for impersonation
-                example: Deleniti qui.
+                example: Ex deleniti.
             serviceAccountName:
                 type: string
                 description: The target serviceAccount
-                example: Ex deleniti.
+                example: Neque occaecati distinctio nihil ut.
         example:
-            jwt: Neque occaecati distinctio nihil ut.
-            namespace: Consectetur est non ducimus fuga.
-            serviceAccountName: Neque commodi.
+            jwt: Consectetur est non ducimus fuga.
+            namespace: Neque commodi.
+            serviceAccountName: Fugiat incidunt omnis mollitia fugit architecto qui.
+    TokenExchangeExchangeTokenResponseBody:
+        title: TokenExchangeExchangeTokenResponseBody
+        type: object
+        properties:
+            status:
+                $ref: '#/definitions/StatusResponseBody'
+        example:
+            status:
+                token: Molestias quam quos velit rerum.
+        required:
+            - status

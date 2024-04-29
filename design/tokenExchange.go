@@ -21,7 +21,7 @@ var _ = Service("tokenExchange", func() {
 		})
 		// Result describes the method result
 		// Here the result is a simple integer value
-		Result(String)
+		Result(StatusResult)
 		// HTTP describes the HTTP transport mapping
 		HTTP(func() {
 			// Requests to the service consist of HTTP GET requests
@@ -32,4 +32,18 @@ var _ = Service("tokenExchange", func() {
 			Response(StatusOK)
 		})
 	})
+})
+
+// Define the nested attribute for the status
+var Status = Type("Status", func() {
+	Description("Status with a token.")
+	Attribute("token", String, "The status token")
+	Required("token") // The token attribute is required
+})
+
+// Define the result type for the endpoint, including the nested 'status' attribute
+var StatusResult = Type("StatusResult", func() {
+	Description("The result type containing status information.")
+	Attribute("status", Status, "The status information with a token") // Nested attribute
+	Required("status")                                                 // The status attribute is required
 })

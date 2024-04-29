@@ -14,7 +14,7 @@ import (
 // Exchange an incoming Kubernetes Token for Another Kubernetes Token
 type Service interface {
 	// ExchangeToken implements exchangeToken.
-	ExchangeToken(context.Context, *ExchangeTokenPayload) (res string, err error)
+	ExchangeToken(context.Context, *ExchangeTokenPayload) (res *StatusResult, err error)
 }
 
 // APIName is the name of the API as defined in the design.
@@ -42,4 +42,17 @@ type ExchangeTokenPayload struct {
 	Namespace *string
 	// The target serviceAccount
 	ServiceAccountName *string
+}
+
+// Status with a token.
+type Status struct {
+	// The status token
+	Token string
+}
+
+// StatusResult is the result type of the tokenExchange service exchangeToken
+// method.
+type StatusResult struct {
+	// The status information with a token
+	Status *Status
 }

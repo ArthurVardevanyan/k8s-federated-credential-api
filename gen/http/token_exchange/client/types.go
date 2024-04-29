@@ -9,6 +9,8 @@ package client
 
 import (
 	tokenexchange "k8s-federated-credential-api/gen/token_exchange"
+
+	goa "goa.design/goa/v3/pkg"
 )
 
 // ExchangeTokenRequestBody is the type of the "tokenExchange" service
@@ -22,6 +24,19 @@ type ExchangeTokenRequestBody struct {
 	ServiceAccountName *string `form:"serviceAccountName,omitempty" json:"serviceAccountName,omitempty" xml:"serviceAccountName,omitempty"`
 }
 
+// ExchangeTokenResponseBody is the type of the "tokenExchange" service
+// "exchangeToken" endpoint HTTP response body.
+type ExchangeTokenResponseBody struct {
+	// The status information with a token
+	Status *StatusResponseBody `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
+}
+
+// StatusResponseBody is used to define fields on response body types.
+type StatusResponseBody struct {
+	// The status token
+	Token *string `form:"token,omitempty" json:"token,omitempty" xml:"token,omitempty"`
+}
+
 // NewExchangeTokenRequestBody builds the HTTP request body from the payload of
 // the "exchangeToken" endpoint of the "tokenExchange" service.
 func NewExchangeTokenRequestBody(p *tokenexchange.ExchangeTokenPayload) *ExchangeTokenRequestBody {
@@ -31,4 +46,35 @@ func NewExchangeTokenRequestBody(p *tokenexchange.ExchangeTokenPayload) *Exchang
 		ServiceAccountName: p.ServiceAccountName,
 	}
 	return body
+}
+
+// NewExchangeTokenStatusResultOK builds a "tokenExchange" service
+// "exchangeToken" endpoint result from a HTTP "OK" response.
+func NewExchangeTokenStatusResultOK(body *ExchangeTokenResponseBody) *tokenexchange.StatusResult {
+	v := &tokenexchange.StatusResult{}
+	v.Status = unmarshalStatusResponseBodyToTokenexchangeStatus(body.Status)
+
+	return v
+}
+
+// ValidateExchangeTokenResponseBody runs the validations defined on
+// ExchangeTokenResponseBody
+func ValidateExchangeTokenResponseBody(body *ExchangeTokenResponseBody) (err error) {
+	if body.Status == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("status", "body"))
+	}
+	if body.Status != nil {
+		if err2 := ValidateStatusResponseBody(body.Status); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	return
+}
+
+// ValidateStatusResponseBody runs the validations defined on StatusResponseBody
+func ValidateStatusResponseBody(body *StatusResponseBody) (err error) {
+	if body.Token == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("token", "body"))
+	}
+	return
 }

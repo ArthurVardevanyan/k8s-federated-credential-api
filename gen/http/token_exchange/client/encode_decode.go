@@ -69,17 +69,32 @@ func DecodeExchangeTokenResponse(decoder func(*http.Response) goahttp.Decoder, r
 		switch resp.StatusCode {
 		case http.StatusOK:
 			var (
-				body string
+				body ExchangeTokenResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("tokenExchange", "exchangeToken", err)
 			}
-			return body, nil
+			err = ValidateExchangeTokenResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("tokenExchange", "exchangeToken", err)
+			}
+			res := NewExchangeTokenStatusResultOK(&body)
+			return res, nil
 		default:
 			body, _ := io.ReadAll(resp.Body)
 			return nil, goahttp.ErrInvalidResponse("tokenExchange", "exchangeToken", resp.StatusCode, string(body))
 		}
 	}
+}
+
+// unmarshalStatusResponseBodyToTokenexchangeStatus builds a value of type
+// *tokenexchange.Status from a value of type *StatusResponseBody.
+func unmarshalStatusResponseBodyToTokenexchangeStatus(v *StatusResponseBody) *tokenexchange.Status {
+	res := &tokenexchange.Status{
+		Token: *v.Token,
+	}
+
+	return res
 }

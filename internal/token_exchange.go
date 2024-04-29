@@ -3,6 +3,7 @@ package kfca
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	tokenexchange "k8s-federated-credential-api/gen/token_exchange"
 	"log"
 	"strings"
@@ -34,23 +35,32 @@ func NewTokenExchange(logger *log.Logger) tokenexchange.Service {
 }
 
 // ExchangeToken implements exchangeToken.
-func (s *tokenExchangesrvc) ExchangeToken(ctx context.Context, p *tokenexchange.ExchangeTokenPayload) (res string, err error) {
+func (s *tokenExchangesrvc) ExchangeToken(ctx context.Context, p *tokenexchange.ExchangeTokenPayload) (res *tokenexchange.StatusResult, err error) {
+	res = &tokenexchange.StatusResult{
+		Status: &tokenexchange.Status{
+			Token: "", // Your desired token value
+		},
+	}
+
 	s.logger.Print("tokenExchange.exchangeToken")
 
 	// creates the in-cluster config
 	config, err := rest.InClusterConfig()
 	if err != nil {
-		return err.Error(), err
+		return res, err
 	}
 	// creates the clientSet
 	clientSet, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		return err.Error(), err
+		//return err.Error(), err
+		return res, err
+
 	}
 
 	serviceAccount, err := clientSet.CoreV1().ServiceAccounts(*p.Namespace).Get(ctx, *p.ServiceAccountName, metav1.GetOptions{})
 	if err != nil {
-		return "service Account Not Found. Error: %v", err
+		//return "service Account Not Found. Error: %v", err
+		return res, err
 	}
 
 	annotations := serviceAccount.GetAnnotations()
@@ -62,7 +72,8 @@ func (s *tokenExchangesrvc) ExchangeToken(ctx context.Context, p *tokenexchange.
 			var serviceAccountInfo ServiceAccountInfo
 			err := json.Unmarshal(jsonData, &serviceAccountInfo)
 			if err != nil {
-				return "Error un-marshalling JSON:", err
+				//return "Error un-marshalling JSON:", err
+				return res, err
 			}
 
 			provider, err := oidc.NewProvider(ctx, serviceAccountInfo.Issuer)
@@ -112,18 +123,19 @@ func (s *tokenExchangesrvc) ExchangeToken(ctx context.Context, p *tokenexchange.
 				tokenRequest := kubernetesAuthToken(tokenExpirationSeconds)
 				token, err := clientSet.CoreV1().ServiceAccounts(*p.Namespace).CreateToken(ctx, *p.ServiceAccountName, tokenRequest, metav1.CreateOptions{})
 				if err != nil {
-					return "Failed to create token: %v", err
+					//res.Token = "Failed to create token: %v" + err.Error()
+					return res, err
 				}
 
-				return token.Status.Token, nil
+				res.Status.Token = token.Status.Token
+				return res, nil
 			} else {
 				// If Log Level Debug
 				//println(claims.Iss + " " + serviceAccountInfo.Issuer + " " + claims.Kubernetes.Namespace + " " + serviceAccountInfo.Namespace + " " + claims.Kubernetes.ServiceAccount.Name + " " + serviceAccountInfo.ServiceAccountName)
 			}
 		}
 	}
-
-	return "No Matching Binding Found", nil
+	return res, fmt.Errorf("No Matching Binding Found")
 
 }
 
