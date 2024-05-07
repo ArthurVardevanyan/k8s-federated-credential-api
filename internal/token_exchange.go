@@ -35,6 +35,7 @@ func NewTokenExchange(logger *log.Logger) tokenexchange.Service {
 
 // ExchangeToken implements exchangeToken.
 func (s *tokenExchangesrvc) ExchangeToken(ctx context.Context, p *tokenexchange.ExchangeTokenPayload) (res *tokenexchange.StatusResult, err error) {
+	const hourSeconds = 3600
 	res = &tokenexchange.StatusResult{
 		Status: &tokenexchange.Status{
 			Token: "", // Your desired token value
@@ -117,9 +118,12 @@ func (s *tokenExchangesrvc) ExchangeToken(ctx context.Context, p *tokenexchange.
 				// return "Failed to extract claims: %v", err
 			}
 
+			if (claims.Exp - claims.Iat) > hourSeconds {
+				return res, fmt.Errorf("only tokens with a validity of one hour or less or accepted. ")
+			}
+
 			if claims.Iss == serviceAccountInfo.Issuer && claims.Sub == serviceAccountInfo.Subject {
-				const tokenExpirationSeconds = 3600
-				tokenRequest := kubernetesAuthToken(tokenExpirationSeconds)
+				tokenRequest := kubernetesAuthToken(hourSeconds)
 				token, err := clientSet.CoreV1().ServiceAccounts(*p.Namespace).CreateToken(ctx, *p.ServiceAccountName, tokenRequest, metav1.CreateOptions{})
 				if err != nil {
 					//res.Token = "Failed to create token: %v" + err.Error()
@@ -134,7 +138,7 @@ func (s *tokenExchangesrvc) ExchangeToken(ctx context.Context, p *tokenexchange.
 			}
 		}
 	}
-	return res, fmt.Errorf("No Matching Binding Found")
+	return res, fmt.Errorf("no matching binding found")
 
 }
 
