@@ -18,9 +18,8 @@ import (
 )
 
 type ServiceAccountInfo struct {
-	Issuer             string `json:"issuer"`
-	Namespace          string `json:"namespace"`
-	ServiceAccountName string `json:"serviceAccountName"`
+	Issuer  string `json:"issuer"`
+	Subject string `json:"subject"`
 }
 
 // tokenExchange service example implementation.
@@ -118,7 +117,7 @@ func (s *tokenExchangesrvc) ExchangeToken(ctx context.Context, p *tokenexchange.
 				// return "Failed to extract claims: %v", err
 			}
 
-			if claims.Iss == serviceAccountInfo.Issuer && claims.Kubernetes.Namespace == serviceAccountInfo.Namespace && claims.Kubernetes.ServiceAccount.Name == serviceAccountInfo.ServiceAccountName {
+			if claims.Iss == serviceAccountInfo.Issuer && claims.Sub == serviceAccountInfo.Subject {
 				const tokenExpirationSeconds = 3600
 				tokenRequest := kubernetesAuthToken(tokenExpirationSeconds)
 				token, err := clientSet.CoreV1().ServiceAccounts(*p.Namespace).CreateToken(ctx, *p.ServiceAccountName, tokenRequest, metav1.CreateOptions{})
@@ -131,7 +130,7 @@ func (s *tokenExchangesrvc) ExchangeToken(ctx context.Context, p *tokenexchange.
 				return res, nil
 			} else {
 				// If Log Level Debug
-				//println(claims.Iss + " " + serviceAccountInfo.Issuer + " " + claims.Kubernetes.Namespace + " " + serviceAccountInfo.Namespace + " " + claims.Kubernetes.ServiceAccount.Name + " " + serviceAccountInfo.ServiceAccountName)
+				//println(claims.Iss == serviceAccountInfo.Issuer && claims.Sub == serviceAccountInfo.Subject)
 			}
 		}
 	}

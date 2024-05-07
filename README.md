@@ -13,7 +13,9 @@ go mod init k8s-federated-credential-api
 
 go build -C cmd/kfca -o /tmp/kfca && /tmp/kfca
 ```
+
 ## Usage
+
 Requesting a token for remote kubernetes service account.
 
 Example of target service account annotation can be found in `examples/example.yaml`
