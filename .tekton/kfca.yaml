@@ -8,7 +8,7 @@ metadata:
     pipelinesascode.tekton.dev/on-target-branch: "[main]"
     pipelinesascode.tekton.dev/max-keep-runs: "1"
     pipelinesascode.tekton.dev/task: "https://raw.githubusercontent.com/ArthurVardevanyan/HomeLab/main/tekton/tasks/git-clone/0.9.1/git-clone.yaml"
-    pipelinesascode.tekton.dev/target-namespace: "k8s-federated-credential-api"
+    pipelinesascode.tekton.dev/target-namespace: "homelab"
 spec:
   params:
     - name: git-url
