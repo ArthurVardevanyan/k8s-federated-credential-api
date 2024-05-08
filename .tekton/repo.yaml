@@ -1,0 +1,10 @@
+## DOCS:
+## https://pipelinesascode.com/docs/guide/repositorycrd/#concurrency
+apiVersion: pipelinesascode.tekton.dev/v1alpha1
+kind: Repository
+metadata:
+  name: k8s-federated-credential-api
+  namespace: k8s-federated-credential-api
+spec:
+  url: "https://github.com/ArthurVardevanyan/k8s-federated-credential-api"
+  concurrency_limit: 3
