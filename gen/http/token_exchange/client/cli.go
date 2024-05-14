@@ -21,7 +21,7 @@ func BuildExchangeTokenPayload(tokenExchangeExchangeTokenBody string) (*tokenexc
 	{
 		err = json.Unmarshal([]byte(tokenExchangeExchangeTokenBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"jwt\": \"Non et qui commodi eveniet.\",\n      \"namespace\": \"Consectetur autem et illum qui aut.\",\n      \"serviceAccountName\": \"Et ab commodi voluptate eligendi non temporibus.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"jwt\": \"Rerum quia non et.\",\n      \"namespace\": \"Commodi eveniet a consectetur.\",\n      \"serviceAccountName\": \"Et illum qui aut.\"\n   }'")
 		}
 	}
 	v := &tokenexchange.ExchangeTokenPayload{

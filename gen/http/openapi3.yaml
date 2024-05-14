@@ -19,9 +19,9 @@ paths:
                         schema:
                             $ref: '#/components/schemas/ExchangeTokenRequestBody'
                         example:
-                            jwt: Non et qui commodi eveniet.
-                            namespace: Consectetur autem et illum qui aut.
-                            serviceAccountName: Et ab commodi voluptate eligendi non temporibus.
+                            jwt: Rerum quia non et.
+                            namespace: Commodi eveniet a consectetur.
+                            serviceAccountName: Et illum qui aut.
             responses:
                 "200":
                     description: OK response.
@@ -31,7 +31,7 @@ paths:
                                 $ref: '#/components/schemas/StatusResult'
                             example:
                                 status:
-                                    token: Molestias quam quos velit rerum.
+                                    token: Et ab commodi voluptate eligendi non temporibus.
 components:
     schemas:
         ExchangeTokenRequestBody:
@@ -40,29 +40,29 @@ components:
                 jwt:
                     type: string
                     description: The JWT Token from the impersonating service account
-                    example: Molestiae animi ab.
+                    example: Fugiat incidunt omnis mollitia fugit architecto qui.
                 namespace:
                     type: string
                     description: The target namespace for impersonation
-                    example: Officia expedita magnam et enim.
+                    example: Molestiae animi ab.
                 serviceAccountName:
                     type: string
                     description: The target serviceAccount
-                    example: Maiores unde.
+                    example: Officia expedita magnam et enim.
             example:
-                jwt: Qui voluptas ad quis sit voluptates tempora.
-                namespace: Molestiae ad error voluptas.
-                serviceAccountName: Est alias harum ut quis quod totam.
+                jwt: Maiores unde.
+                namespace: Qui voluptas ad quis sit voluptates tempora.
+                serviceAccountName: Molestiae ad error voluptas.
         Status:
             type: object
             properties:
                 token:
                     type: string
                     description: The status token
-                    example: Iste numquam veritatis aut quas.
+                    example: Est alias harum ut quis quod totam.
             description: Status with a token.
             example:
-                token: Laudantium corporis.
+                token: Iste numquam veritatis aut quas.
             required:
                 - token
         StatusResult:
@@ -72,9 +72,11 @@ components:
                     $ref: '#/components/schemas/Status'
             example:
                 status:
-                    token: Molestias quam quos velit rerum.
+                    token: Et ab commodi voluptate eligendi non temporibus.
             required:
                 - status
 tags:
+    - name: livez
+    - name: readyz
     - name: tokenExchange
       description: Exchange an incoming Kubernetes Token for Another Kubernetes Token

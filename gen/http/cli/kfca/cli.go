@@ -10,6 +10,8 @@ package cli
 import (
 	"flag"
 	"fmt"
+	livezc "k8s-federated-credential-api/gen/http/livez/client"
+	readyzc "k8s-federated-credential-api/gen/http/readyz/client"
 	tokenexchangec "k8s-federated-credential-api/gen/http/token_exchange/client"
 	"net/http"
 	"os"
@@ -23,16 +25,20 @@ import (
 //	command (subcommand1|subcommand2|...)
 func UsageCommands() string {
 	return `token-exchange exchange-token
+readyz readyz
+livez livez
 `
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
 	return os.Args[0] + ` token-exchange exchange-token --body '{
-      "jwt": "Non et qui commodi eveniet.",
-      "namespace": "Consectetur autem et illum qui aut.",
-      "serviceAccountName": "Et ab commodi voluptate eligendi non temporibus."
+      "jwt": "Rerum quia non et.",
+      "namespace": "Commodi eveniet a consectetur.",
+      "serviceAccountName": "Et illum qui aut."
    }'` + "\n" +
+		os.Args[0] + ` readyz readyz` + "\n" +
+		os.Args[0] + ` livez livez` + "\n" +
 		""
 }
 
@@ -50,9 +56,23 @@ func ParseEndpoint(
 
 		tokenExchangeExchangeTokenFlags    = flag.NewFlagSet("exchange-token", flag.ExitOnError)
 		tokenExchangeExchangeTokenBodyFlag = tokenExchangeExchangeTokenFlags.String("body", "REQUIRED", "")
+
+		readyzFlags = flag.NewFlagSet("readyz", flag.ContinueOnError)
+
+		readyzReadyzFlags = flag.NewFlagSet("readyz", flag.ExitOnError)
+
+		livezFlags = flag.NewFlagSet("livez", flag.ContinueOnError)
+
+		livezLivezFlags = flag.NewFlagSet("livez", flag.ExitOnError)
 	)
 	tokenExchangeFlags.Usage = tokenExchangeUsage
 	tokenExchangeExchangeTokenFlags.Usage = tokenExchangeExchangeTokenUsage
+
+	readyzFlags.Usage = readyzUsage
+	readyzReadyzFlags.Usage = readyzReadyzUsage
+
+	livezFlags.Usage = livezUsage
+	livezLivezFlags.Usage = livezLivezUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -71,6 +91,10 @@ func ParseEndpoint(
 		switch svcn {
 		case "token-exchange":
 			svcf = tokenExchangeFlags
+		case "readyz":
+			svcf = readyzFlags
+		case "livez":
+			svcf = livezFlags
 		default:
 			return nil, nil, fmt.Errorf("unknown service %q", svcn)
 		}
@@ -90,6 +114,20 @@ func ParseEndpoint(
 			switch epn {
 			case "exchange-token":
 				epf = tokenExchangeExchangeTokenFlags
+
+			}
+
+		case "readyz":
+			switch epn {
+			case "readyz":
+				epf = readyzReadyzFlags
+
+			}
+
+		case "livez":
+			switch epn {
+			case "livez":
+				epf = livezLivezFlags
 
 			}
 
@@ -119,6 +157,20 @@ func ParseEndpoint(
 			case "exchange-token":
 				endpoint = c.ExchangeToken()
 				data, err = tokenexchangec.BuildExchangeTokenPayload(*tokenExchangeExchangeTokenBodyFlag)
+			}
+		case "readyz":
+			c := readyzc.NewClient(scheme, host, doer, enc, dec, restore)
+			switch epn {
+			case "readyz":
+				endpoint = c.Readyz()
+				data = nil
+			}
+		case "livez":
+			c := livezc.NewClient(scheme, host, doer, enc, dec, restore)
+			switch epn {
+			case "livez":
+				endpoint = c.Livez()
+				data = nil
 			}
 		}
 	}
@@ -151,9 +203,55 @@ ExchangeToken implements exchangeToken.
 
 Example:
     %[1]s token-exchange exchange-token --body '{
-      "jwt": "Non et qui commodi eveniet.",
-      "namespace": "Consectetur autem et illum qui aut.",
-      "serviceAccountName": "Et ab commodi voluptate eligendi non temporibus."
+      "jwt": "Rerum quia non et.",
+      "namespace": "Commodi eveniet a consectetur.",
+      "serviceAccountName": "Et illum qui aut."
    }'
+`, os.Args[0])
+}
+
+// readyzUsage displays the usage of the readyz command and its subcommands.
+func readyzUsage() {
+	fmt.Fprintf(os.Stderr, `Service is the readyz service interface.
+Usage:
+    %[1]s [globalflags] readyz COMMAND [flags]
+
+COMMAND:
+    readyz: Readyz implements readyz.
+
+Additional help:
+    %[1]s readyz COMMAND --help
+`, os.Args[0])
+}
+func readyzReadyzUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] readyz readyz
+
+Readyz implements readyz.
+
+Example:
+    %[1]s readyz readyz
+`, os.Args[0])
+}
+
+// livezUsage displays the usage of the livez command and its subcommands.
+func livezUsage() {
+	fmt.Fprintf(os.Stderr, `Service is the livez service interface.
+Usage:
+    %[1]s [globalflags] livez COMMAND [flags]
+
+COMMAND:
+    livez: Livez implements livez.
+
+Additional help:
+    %[1]s livez COMMAND --help
+`, os.Args[0])
+}
+func livezLivezUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] livez livez
+
+Livez implements livez.
+
+Example:
+    %[1]s livez livez
 `, os.Args[0])
 }

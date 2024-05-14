@@ -17,10 +17,13 @@ endif
 SHELL = /usr/bin/env bash -o pipefail
 .SHELLFLAGS = -ec
 
+.PHONY: build
+build:
+	go build -C cmd/kfca -o /tmp/kfca
 
 .PHONY: run
-run:
-	go build -C cmd/kfca -o /tmp/kfca && /tmp/kfca
+run: build
+	/tmp/kfca
 
 .PHONY: ko-build
 ko-build:
