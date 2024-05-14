@@ -6,23 +6,34 @@ metadata:
   annotations:
     checkov.io/skip1: CKV_K8S_40=OpenShift Injects Random UID
     checkov.io/skip2: CKV_K8S_38=Operator Requires use of Tokens
-  name: k8s-federated-credential-api-manager
+  name: k8s-federated-credential-api
   namespace: k8s-federated-credential-api
 spec:
-  replicas: 1
+  #replicas: 1
   selector:
     matchLabels:
       app: k8s-federated-credential-api
   template:
     metadata:
-      annotations:
-        kubectl.kubernetes.io/default-container: manager
       labels:
         app: k8s-federated-credential-api
     spec:
       securityContext:
         seccompProfile:
           type: RuntimeDefault
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: k8s-federated-credential-api
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: k8s-federated-credential-api
       containers:
         - image: ""
           name: k8s-federated-credential-api
@@ -30,18 +41,22 @@ spec:
             - containerPort: 8088
               name: http
               protocol: TCP
-          # livenessProbe:
-          #   httpGet:
-          #     path: /healthz
-          #     port: 8081
-          #   initialDelaySeconds: 15
-          #   periodSeconds: 20
-          # readinessProbe:
-          #   httpGet:
-          #     path: /readyz
-          #     port: 8081
-          #   initialDelaySeconds: 5
-          #   periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: 8088
+            timeoutSeconds: 1
+            periodSeconds: 30
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8088
+            timeoutSeconds: 1
+            periodSeconds: 30
+            successThreshold: 1
+            failureThreshold: 3
           resources:
             limits:
               cpu: 100m

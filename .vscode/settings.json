@@ -24,6 +24,10 @@
     "editor.defaultFormatter": "redhat.vscode-yaml"
   },
   "cSpell.words": [
+    "Autoscaler",
+    "kfca",
+    "livez",
+    "readyz",
     "serviceaccounts"
   ],
 }

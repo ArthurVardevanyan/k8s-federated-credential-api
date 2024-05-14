@@ -4,6 +4,8 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	livez "k8s-federated-credential-api/gen/livez"
+	readyz "k8s-federated-credential-api/gen/readyz"
 	tokenexchange "k8s-federated-credential-api/gen/token_exchange"
 	kfca "k8s-federated-credential-api/internal"
 	"log"
@@ -38,18 +40,26 @@ func main() {
 	// Initialize the services.
 	var (
 		tokenExchangeSvc tokenexchange.Service
+		readyzSvc        readyz.Service
+		livezSvc         livez.Service
 	)
 	{
 		tokenExchangeSvc = kfca.NewTokenExchange(logger)
+		readyzSvc = kfca.NewReadyz(logger)
+		livezSvc = kfca.NewLivez(logger)
 	}
 
 	// Wrap the services in endpoints that can be invoked from other services
 	// potentially running in different processes.
 	var (
 		tokenExchangeEndpoints *tokenexchange.Endpoints
+		readyzEndpoints        *readyz.Endpoints
+		livezEndpoints         *livez.Endpoints
 	)
 	{
 		tokenExchangeEndpoints = tokenexchange.NewEndpoints(tokenExchangeSvc)
+		readyzEndpoints = readyz.NewEndpoints(readyzSvc)
+		livezEndpoints = livez.NewEndpoints(livezSvc)
 	}
 
 	// Create channel used by both the signal handler and server goroutines
@@ -91,7 +101,7 @@ func main() {
 			} else if u.Port() == "" {
 				u.Host = net.JoinHostPort(u.Host, "80")
 			}
-			handleHTTPServer(ctx, u, tokenExchangeEndpoints, &wg, errc, logger, *dbgF)
+			handleHTTPServer(ctx, u, tokenExchangeEndpoints, readyzEndpoints, livezEndpoints, &wg, errc, logger, *dbgF)
 		}
 
 	default:

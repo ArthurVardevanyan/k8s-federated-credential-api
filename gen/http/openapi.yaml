@@ -42,10 +42,10 @@ definitions:
             token:
                 type: string
                 description: The status token
-                example: Harum et.
+                example: Molestias quam quos velit rerum.
         description: Status with a token.
         example:
-            token: Ut et itaque quod.
+            token: Harum et.
         required:
             - token
     TokenExchangeExchangeTokenRequestBody:
@@ -55,19 +55,19 @@ definitions:
             jwt:
                 type: string
                 description: The JWT Token from the impersonating service account
-                example: Deleniti qui.
+                example: Ut et itaque quod.
             namespace:
                 type: string
                 description: The target namespace for impersonation
-                example: Ex deleniti.
+                example: Deleniti qui.
             serviceAccountName:
                 type: string
                 description: The target serviceAccount
-                example: Neque occaecati distinctio nihil ut.
+                example: Ex deleniti.
         example:
-            jwt: Consectetur est non ducimus fuga.
-            namespace: Neque commodi.
-            serviceAccountName: Fugiat incidunt omnis mollitia fugit architecto qui.
+            jwt: Neque occaecati distinctio nihil ut.
+            namespace: Consectetur est non ducimus fuga.
+            serviceAccountName: Neque commodi.
     TokenExchangeExchangeTokenResponseBody:
         title: TokenExchangeExchangeTokenResponseBody
         type: object
@@ -76,6 +76,6 @@ definitions:
                 $ref: '#/definitions/StatusResponseBody'
         example:
             status:
-                token: Molestias quam quos velit rerum.
+                token: Et ab commodi voluptate eligendi non temporibus.
         required:
             - status

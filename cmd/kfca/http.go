@@ -2,7 +2,11 @@ package main
 
 import (
 	"context"
+	livezsvr "k8s-federated-credential-api/gen/http/livez/server"
+	readyzsvr "k8s-federated-credential-api/gen/http/readyz/server"
 	tokenexchangesvr "k8s-federated-credential-api/gen/http/token_exchange/server"
+	livez "k8s-federated-credential-api/gen/livez"
+	readyz "k8s-federated-credential-api/gen/readyz"
 	tokenexchange "k8s-federated-credential-api/gen/token_exchange"
 	"log"
 	"net/http"
@@ -18,7 +22,7 @@ import (
 
 // handleHTTPServer starts configures and starts a HTTP server on the given
 // URL. It shuts down the server if any error is received in the error channel.
-func handleHTTPServer(ctx context.Context, u *url.URL, tokenExchangeEndpoints *tokenexchange.Endpoints, wg *sync.WaitGroup, errc chan error, logger *log.Logger, debug bool) {
+func handleHTTPServer(ctx context.Context, u *url.URL, tokenExchangeEndpoints *tokenexchange.Endpoints, readyzEndpoints *readyz.Endpoints, livezEndpoints *livez.Endpoints, wg *sync.WaitGroup, errc chan error, logger *log.Logger, debug bool) {
 
 	// Setup goa log adapter.
 	var (
@@ -50,19 +54,27 @@ func handleHTTPServer(ctx context.Context, u *url.URL, tokenExchangeEndpoints *t
 	// responses.
 	var (
 		tokenExchangeServer *tokenexchangesvr.Server
+		readyzServer        *readyzsvr.Server
+		livezServer         *livezsvr.Server
 	)
 	{
 		eh := errorHandler(logger)
 		tokenExchangeServer = tokenexchangesvr.New(tokenExchangeEndpoints, mux, dec, enc, eh, nil)
+		readyzServer = readyzsvr.New(readyzEndpoints, mux, dec, enc, eh, nil)
+		livezServer = livezsvr.New(livezEndpoints, mux, dec, enc, eh, nil)
 		if debug {
 			servers := goahttp.Servers{
 				tokenExchangeServer,
+				readyzServer,
+				livezServer,
 			}
 			servers.Use(httpmdlwr.Debug(mux, os.Stdout))
 		}
 	}
 	// Configure the mux.
 	tokenexchangesvr.Mount(mux, tokenExchangeServer)
+	readyzsvr.Mount(mux, readyzServer)
+	livezsvr.Mount(mux, livezServer)
 
 	// Wrap the multiplexer with additional middlewares. Middlewares mounted
 	// here apply to all the service endpoints.
@@ -76,6 +88,12 @@ func handleHTTPServer(ctx context.Context, u *url.URL, tokenExchangeEndpoints *t
 	// configure the server as required by your service.
 	srv := &http.Server{Addr: u.Host, Handler: handler, ReadHeaderTimeout: time.Second * 60}
 	for _, m := range tokenExchangeServer.Mounts {
+		logger.Printf("HTTP %q mounted on %s %s", m.Method, m.Verb, m.Pattern)
+	}
+	for _, m := range readyzServer.Mounts {
+		logger.Printf("HTTP %q mounted on %s %s", m.Method, m.Verb, m.Pattern)
+	}
+	for _, m := range livezServer.Mounts {
 		logger.Printf("HTTP %q mounted on %s %s", m.Method, m.Verb, m.Pattern)
 	}
 
