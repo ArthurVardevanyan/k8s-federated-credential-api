@@ -33,10 +33,9 @@ livez livez
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
 	return os.Args[0] + ` token-exchange exchange-token --body '{
-      "jwt": "Rerum quia non et.",
-      "namespace": "Commodi eveniet a consectetur.",
-      "serviceAccountName": "Et illum qui aut."
-   }'` + "\n" +
+      "namespace": "q0t",
+      "serviceAccountName": "ki0"
+   }' --authorization "y12"` + "\n" +
 		os.Args[0] + ` readyz readyz` + "\n" +
 		os.Args[0] + ` livez livez` + "\n" +
 		""
@@ -54,8 +53,9 @@ func ParseEndpoint(
 	var (
 		tokenExchangeFlags = flag.NewFlagSet("token-exchange", flag.ContinueOnError)
 
-		tokenExchangeExchangeTokenFlags    = flag.NewFlagSet("exchange-token", flag.ExitOnError)
-		tokenExchangeExchangeTokenBodyFlag = tokenExchangeExchangeTokenFlags.String("body", "REQUIRED", "")
+		tokenExchangeExchangeTokenFlags             = flag.NewFlagSet("exchange-token", flag.ExitOnError)
+		tokenExchangeExchangeTokenBodyFlag          = tokenExchangeExchangeTokenFlags.String("body", "REQUIRED", "")
+		tokenExchangeExchangeTokenAuthorizationFlag = tokenExchangeExchangeTokenFlags.String("authorization", "REQUIRED", "")
 
 		readyzFlags = flag.NewFlagSet("readyz", flag.ContinueOnError)
 
@@ -156,7 +156,7 @@ func ParseEndpoint(
 			switch epn {
 			case "exchange-token":
 				endpoint = c.ExchangeToken()
-				data, err = tokenexchangec.BuildExchangeTokenPayload(*tokenExchangeExchangeTokenBodyFlag)
+				data, err = tokenexchangec.BuildExchangeTokenPayload(*tokenExchangeExchangeTokenBodyFlag, *tokenExchangeExchangeTokenAuthorizationFlag)
 			}
 		case "readyz":
 			c := readyzc.NewClient(scheme, host, doer, enc, dec, restore)
@@ -196,17 +196,17 @@ Additional help:
 `, os.Args[0])
 }
 func tokenExchangeExchangeTokenUsage() {
-	fmt.Fprintf(os.Stderr, `%[1]s [flags] token-exchange exchange-token -body JSON
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] token-exchange exchange-token -body JSON -authorization STRING
 
 ExchangeToken implements exchangeToken.
     -body JSON: 
+    -authorization STRING: 
 
 Example:
     %[1]s token-exchange exchange-token --body '{
-      "jwt": "Rerum quia non et.",
-      "namespace": "Commodi eveniet a consectetur.",
-      "serviceAccountName": "Et illum qui aut."
-   }'
+      "namespace": "q0t",
+      "serviceAccountName": "ki0"
+   }' --authorization "y12"
 `, os.Args[0])
 }
 

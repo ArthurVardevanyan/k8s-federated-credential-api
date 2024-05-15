@@ -14,6 +14,7 @@ import (
 	tokenexchange "k8s-federated-credential-api/gen/token_exchange"
 	"net/http"
 	"net/url"
+	"strings"
 
 	goahttp "goa.design/goa/v3/http"
 )
@@ -41,6 +42,14 @@ func EncodeExchangeTokenRequest(encoder func(*http.Request) goahttp.Encoder) fun
 		if !ok {
 			return goahttp.ErrInvalidType("tokenExchange", "exchangeToken", "*tokenexchange.ExchangeTokenPayload", v)
 		}
+		{
+			head := p.Authorization
+			if !strings.Contains(head, " ") {
+				req.Header.Set("Authorization", "Bearer "+head)
+			} else {
+				req.Header.Set("Authorization", head)
+			}
+		}
 		body := NewExchangeTokenRequestBody(p)
 		if err := encoder(req).Encode(&body); err != nil {
 			return goahttp.ErrEncodingError("tokenExchange", "exchangeToken", err)
@@ -52,6 +61,16 @@ func EncodeExchangeTokenRequest(encoder func(*http.Request) goahttp.Encoder) fun
 // DecodeExchangeTokenResponse returns a decoder for responses returned by the
 // tokenExchange exchangeToken endpoint. restoreBody controls whether the
 // response body should be restored after having been read.
+// DecodeExchangeTokenResponse may return the following errors:
+//   - "internal_error" (type *goa.ServiceError): http.StatusInternalServerError
+//   - "forbidden" (type *goa.ServiceError): http.StatusForbidden
+//   - "not_found" (type *goa.ServiceError): http.StatusNotFound
+//   - "not_acceptable" (type *goa.ServiceError): http.StatusNotAcceptable
+//   - "unauthorized" (type *goa.ServiceError): http.StatusUnauthorized
+//   - "bad_request_error" (type *goa.ServiceError): http.StatusBadRequest
+//   - "unsupported_media_type" (type *goa.ServiceError): http.StatusUnsupportedMediaType
+//   - "too_many_requests" (type *goa.ServiceError): http.StatusTooManyRequests
+//   - error: internal error
 func DecodeExchangeTokenResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
 	return func(resp *http.Response) (any, error) {
 		if restoreBody {
@@ -82,6 +101,118 @@ func DecodeExchangeTokenResponse(decoder func(*http.Response) goahttp.Decoder, r
 			}
 			res := NewExchangeTokenStatusResultOK(&body)
 			return res, nil
+		case http.StatusInternalServerError:
+			var (
+				body ExchangeTokenInternalErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("tokenExchange", "exchangeToken", err)
+			}
+			err = ValidateExchangeTokenInternalErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("tokenExchange", "exchangeToken", err)
+			}
+			return nil, NewExchangeTokenInternalError(&body)
+		case http.StatusForbidden:
+			var (
+				body ExchangeTokenForbiddenResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("tokenExchange", "exchangeToken", err)
+			}
+			err = ValidateExchangeTokenForbiddenResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("tokenExchange", "exchangeToken", err)
+			}
+			return nil, NewExchangeTokenForbidden(&body)
+		case http.StatusNotFound:
+			var (
+				body ExchangeTokenNotFoundResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("tokenExchange", "exchangeToken", err)
+			}
+			err = ValidateExchangeTokenNotFoundResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("tokenExchange", "exchangeToken", err)
+			}
+			return nil, NewExchangeTokenNotFound(&body)
+		case http.StatusNotAcceptable:
+			var (
+				body ExchangeTokenNotAcceptableResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("tokenExchange", "exchangeToken", err)
+			}
+			err = ValidateExchangeTokenNotAcceptableResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("tokenExchange", "exchangeToken", err)
+			}
+			return nil, NewExchangeTokenNotAcceptable(&body)
+		case http.StatusUnauthorized:
+			var (
+				body ExchangeTokenUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("tokenExchange", "exchangeToken", err)
+			}
+			err = ValidateExchangeTokenUnauthorizedResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("tokenExchange", "exchangeToken", err)
+			}
+			return nil, NewExchangeTokenUnauthorized(&body)
+		case http.StatusBadRequest:
+			var (
+				body ExchangeTokenBadRequestErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("tokenExchange", "exchangeToken", err)
+			}
+			err = ValidateExchangeTokenBadRequestErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("tokenExchange", "exchangeToken", err)
+			}
+			return nil, NewExchangeTokenBadRequestError(&body)
+		case http.StatusUnsupportedMediaType:
+			var (
+				body ExchangeTokenUnsupportedMediaTypeResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("tokenExchange", "exchangeToken", err)
+			}
+			err = ValidateExchangeTokenUnsupportedMediaTypeResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("tokenExchange", "exchangeToken", err)
+			}
+			return nil, NewExchangeTokenUnsupportedMediaType(&body)
+		case http.StatusTooManyRequests:
+			var (
+				body ExchangeTokenTooManyRequestsResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("tokenExchange", "exchangeToken", err)
+			}
+			err = ValidateExchangeTokenTooManyRequestsResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("tokenExchange", "exchangeToken", err)
+			}
+			return nil, NewExchangeTokenTooManyRequests(&body)
 		default:
 			body, _ := io.ReadAll(resp.Body)
 			return nil, goahttp.ErrInvalidResponse("tokenExchange", "exchangeToken", resp.StatusCode, string(body))

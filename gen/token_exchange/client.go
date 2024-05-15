@@ -27,6 +27,16 @@ func NewClient(exchangeToken goa.Endpoint) *Client {
 
 // ExchangeToken calls the "exchangeToken" endpoint of the "tokenExchange"
 // service.
+// ExchangeToken may return the following errors:
+//   - "internal_error" (type *goa.ServiceError): Internal Server Error
+//   - "forbidden" (type *goa.ServiceError): Forbidden
+//   - "not_found" (type *goa.ServiceError): Not Found
+//   - "not_acceptable" (type *goa.ServiceError): Not Acceptable
+//   - "unauthorized" (type *goa.ServiceError): Unauthorized
+//   - "bad_request_error" (type *goa.ServiceError): Bad Request
+//   - "unsupported_media_type" (type *goa.ServiceError): Unsupported Media Type
+//   - "too_many_requests" (type *goa.ServiceError): Too Many Requests
+//   - error: internal error
 func (c *Client) ExchangeToken(ctx context.Context, p *ExchangeTokenPayload) (res *StatusResult, err error) {
 	var ires any
 	ires, err = c.ExchangeTokenEndpoint(ctx, p)
