@@ -5,4 +5,6 @@ metadata:
   namespace: smoke-tests
   annotations:
     kfca_1: '{ "issuer": "https://storage.googleapis.com/dne", "subject": "system:serviceaccount:smoke-tests:default"}'
-    kfca_2: '{ "issuer": "https://storage.googleapis.com/okd-homelab-wif-oidc", "subject": "system:serviceaccount:default:default"}'
+    kfca_2: '{ "issuer": "https://storage.googleapis.com/okd-homelab-wif-oidc", "subject": "system:serviceaccount:default:test"}'
+    kfca_3: '{ "issuer": "https://storage.googleapis.com/okd-homelab-wif-oidc", "subject": "system:serviceaccount:default:default"}'
+    kfca_4: '{ "issuer": "https://storage.googleapis.com/okd-homelab-wif-oidc", "subject": "system:serviceaccount:default:test"}'

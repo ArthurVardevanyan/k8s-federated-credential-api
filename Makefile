@@ -1,5 +1,4 @@
 
-export KO_DOCKER_REPO=registry.arthurvardevanyan.com/homelab/k8s-federated-credential-api
 # https://catalog.redhat.com/software/containers/ubi9/ubi-minimal/615bd9b4075b022acc111bf5?architecture=amd64&image=65e0932f034203e025b55a92
 export KO_DEFAULTBASEIMAGE=registry.access.redhat.com/ubi9-minimal:9.3-1612
 TAG ?= $(shell date --utc '+%Y%m%d-%H%M')
