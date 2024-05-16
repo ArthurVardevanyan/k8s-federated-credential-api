@@ -18,4 +18,9 @@ var _ = API("kfca", func() {
 		Services("livez")
 		Host("localhost", func() { URI("http://0.0.0.0:8088") })
 	})
+
+	HTTP(func() {
+		Produces("application/json")
+		Consumes("application/json")
+	})
 })

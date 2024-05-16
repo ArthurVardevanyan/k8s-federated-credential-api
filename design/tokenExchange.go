@@ -9,13 +9,12 @@ var _ = Service("tokenExchange", func() {
 	Description("Exchange an incoming Kubernetes Token for Another Kubernetes Token")
 	// Method describes a service method (endpoint)
 	Method("exchangeToken", func() {
-		Meta("swagger:tags", "\"additionalProperties\":false,")
 		Security(JWTAuth)
 		// Payload describes the method payload
 		// Here the payload is an object that consists of two fields
 		Payload(func() {
 			Token("Authorization", String, "The JWT Token from the impersonating service account", func() {
-				Pattern("^Bearer [^ ]+")
+				Pattern("^Bearer [^ ]+") //Returning 400 not 401/403
 				MaxLength(2000)
 			})
 
@@ -29,7 +28,7 @@ var _ = Service("tokenExchange", func() {
 				MaxLength(253)
 			})
 
-			Required("Authorization")
+			Required("Authorization") //Returning 400 not 401/403
 			Required("namespace")
 			Required("serviceAccountName")
 
@@ -54,15 +53,32 @@ var _ = Service("tokenExchange", func() {
 			POST("/exchangeToken")
 			// Responses use a "200 OK" HTTP status
 			// The result is encoded in the response body
+
 			Response(StatusOK)
-			Response("internal_error", StatusInternalServerError)
-			Response("forbidden", StatusForbidden)
-			Response("not_found", StatusNotFound)
-			Response("not_acceptable", StatusNotAcceptable)
-			Response("unauthorized", StatusUnauthorized)
-			Response("bad_request_error", StatusBadRequest)
-			Response("unsupported_media_type", StatusUnsupportedMediaType)
-			Response("too_many_requests", StatusTooManyRequests)
+			Response("internal_error", StatusInternalServerError, func() {
+				ContentType("application/json")
+			})
+			Response("forbidden", StatusForbidden, func() {
+				ContentType("application/json")
+			})
+			Response("not_found", StatusNotFound, func() {
+				ContentType("application/json")
+			})
+			Response("not_acceptable", StatusNotAcceptable, func() {
+				ContentType("application/json")
+			})
+			Response("unauthorized", StatusUnauthorized, func() {
+				ContentType("application/json")
+			})
+			Response("bad_request_error", StatusBadRequest, func() {
+				ContentType("application/json")
+			})
+			Response("unsupported_media_type", StatusUnsupportedMediaType, func() {
+				ContentType("application/json")
+			})
+			Response("too_many_requests", StatusTooManyRequests, func() {
+				ContentType("application/json")
+			})
 		})
 	})
 })

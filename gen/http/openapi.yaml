@@ -6,12 +6,8 @@ info:
 host: 0.0.0.0:8088
 consumes:
     - application/json
-    - application/xml
-    - application/gob
 produces:
     - application/json
-    - application/xml
-    - application/gob
 paths:
     /exchangeToken:
         post:

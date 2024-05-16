@@ -34,49 +34,49 @@ paths:
         "400":
           description: 'bad_request_error: Bad Request'
           content:
-            application/vnd.goa.error:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "401":
           description: 'unauthorized: Unauthorized'
           content:
-            application/vnd.goa.error:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "403":
           description: 'forbidden: Forbidden'
           content:
-            application/vnd.goa.error:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "404":
           description: 'not_found: Not Found'
           content:
-            application/vnd.goa.error:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "406":
           description: 'not_acceptable: Not Acceptable'
           content:
-            application/vnd.goa.error:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "415":
           description: 'unsupported_media_type: Unsupported Media Type'
           content:
-            application/vnd.goa.error:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "429":
           description: 'too_many_requests: Too Many Requests'
           content:
-            application/vnd.goa.error:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "500":
           description: 'internal_error: Internal Server Error'
           content:
-            application/vnd.goa.error:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
       security:

@@ -90,6 +90,7 @@ func EncodeExchangeTokenError(encoder func(context.Context, http.ResponseWriter)
 		case "internal_error":
 			var res *goa.ServiceError
 			errors.As(v, &res)
+			ctx = context.WithValue(ctx, goahttp.ContentTypeKey, "application/json")
 			enc := encoder(ctx, w)
 			var body any
 			if formatter != nil {
@@ -103,6 +104,7 @@ func EncodeExchangeTokenError(encoder func(context.Context, http.ResponseWriter)
 		case "forbidden":
 			var res *goa.ServiceError
 			errors.As(v, &res)
+			ctx = context.WithValue(ctx, goahttp.ContentTypeKey, "application/json")
 			enc := encoder(ctx, w)
 			var body any
 			if formatter != nil {
@@ -116,6 +118,7 @@ func EncodeExchangeTokenError(encoder func(context.Context, http.ResponseWriter)
 		case "not_found":
 			var res *goa.ServiceError
 			errors.As(v, &res)
+			ctx = context.WithValue(ctx, goahttp.ContentTypeKey, "application/json")
 			enc := encoder(ctx, w)
 			var body any
 			if formatter != nil {
@@ -129,6 +132,7 @@ func EncodeExchangeTokenError(encoder func(context.Context, http.ResponseWriter)
 		case "not_acceptable":
 			var res *goa.ServiceError
 			errors.As(v, &res)
+			ctx = context.WithValue(ctx, goahttp.ContentTypeKey, "application/json")
 			enc := encoder(ctx, w)
 			var body any
 			if formatter != nil {
@@ -142,6 +146,7 @@ func EncodeExchangeTokenError(encoder func(context.Context, http.ResponseWriter)
 		case "unauthorized":
 			var res *goa.ServiceError
 			errors.As(v, &res)
+			ctx = context.WithValue(ctx, goahttp.ContentTypeKey, "application/json")
 			enc := encoder(ctx, w)
 			var body any
 			if formatter != nil {
@@ -155,6 +160,7 @@ func EncodeExchangeTokenError(encoder func(context.Context, http.ResponseWriter)
 		case "bad_request_error":
 			var res *goa.ServiceError
 			errors.As(v, &res)
+			ctx = context.WithValue(ctx, goahttp.ContentTypeKey, "application/json")
 			enc := encoder(ctx, w)
 			var body any
 			if formatter != nil {
@@ -168,6 +174,7 @@ func EncodeExchangeTokenError(encoder func(context.Context, http.ResponseWriter)
 		case "unsupported_media_type":
 			var res *goa.ServiceError
 			errors.As(v, &res)
+			ctx = context.WithValue(ctx, goahttp.ContentTypeKey, "application/json")
 			enc := encoder(ctx, w)
 			var body any
 			if formatter != nil {
@@ -181,6 +188,7 @@ func EncodeExchangeTokenError(encoder func(context.Context, http.ResponseWriter)
 		case "too_many_requests":
 			var res *goa.ServiceError
 			errors.As(v, &res)
+			ctx = context.WithValue(ctx, goahttp.ContentTypeKey, "application/json")
 			enc := encoder(ctx, w)
 			var body any
 			if formatter != nil {
