@@ -82,6 +82,7 @@ func handleHTTPServer(ctx context.Context, u *url.URL, tokenExchangeEndpoints *t
 	{
 		handler = httpmdlwr.Log(adapter)(handler)
 		handler = httpmdlwr.RequestID()(handler)
+		handler = contentTypeMiddleware(handler)
 	}
 
 	// Start HTTP server using default configuration, change the code to
@@ -131,3 +132,23 @@ func errorHandler(logger *log.Logger) func(context.Context, http.ResponseWriter,
 		logger.Printf("[%s] ERROR: %s", id, err.Error())
 	}
 }
+
+// ContentTypeMiddleware returns a function that pulls the request's Content-Type header
+// and stores it in the context
+func contentTypeMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), "Content-Type", r.Header.Get("Content-Type"))
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// // ContentTypeMiddleware returns a function that pulls the request's Content-Type header
+// // and stores it in the context
+// type contextKey string
+
+// func contentTypeMiddleware(next http.Handler) http.Handler {
+// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// 		ctx := context.WithValue(r.Context(), contextKey("contentType"), r.Header.Get("Content-Type"))
+// 		next.ServeHTTP(w, r.WithContext(ctx))
+// 	})
+// }

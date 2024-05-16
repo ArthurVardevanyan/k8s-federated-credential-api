@@ -27,7 +27,9 @@
     "Autoscaler",
     "kfca",
     "livez",
+    "metav",
     "readyz",
-    "serviceaccounts"
+    "serviceaccounts",
+    "tokenexchange"
   ],
 }

@@ -22,12 +22,12 @@ Example of target service account annotation can be found in `examples/example.y
 
 ```bash
 export JSON='{
-  "jwt": "'$(kubectl create token default --duration=1h -n default)'",
   "namespace": "smoke-tests",
   "ServiceAccountName": "default"
 }'
 
-curl "http://localhost:8088/exchangeToken" -X POST \
+curl --header "Authorization: Bearer $(kubectl create token default --duration=1h -n default)"\
+  "http://localhost:8088/exchangeToken" -X POST \
   -H "Content-type: application/json" \
   -H "Accept: application/json" \
   -d "${JSON}" | jq

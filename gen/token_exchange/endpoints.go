@@ -11,6 +11,7 @@ import (
 	"context"
 
 	goa "goa.design/goa/v3/pkg"
+	"goa.design/goa/v3/security"
 )
 
 // Endpoints wraps the "tokenExchange" service endpoints.
@@ -20,8 +21,10 @@ type Endpoints struct {
 
 // NewEndpoints wraps the methods of the "tokenExchange" service with endpoints.
 func NewEndpoints(s Service) *Endpoints {
+	// Casting service to Auther interface
+	a := s.(Auther)
 	return &Endpoints{
-		ExchangeToken: NewExchangeTokenEndpoint(s),
+		ExchangeToken: NewExchangeTokenEndpoint(s, a.JWTAuth),
 	}
 }
 
@@ -33,9 +36,19 @@ func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 
 // NewExchangeTokenEndpoint returns an endpoint function that calls the method
 // "exchangeToken" of service "tokenExchange".
-func NewExchangeTokenEndpoint(s Service) goa.Endpoint {
+func NewExchangeTokenEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
 		p := req.(*ExchangeTokenPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{},
+			RequiredScopes: []string{},
+		}
+		ctx, err = authJWTFn(ctx, p.Authorization, &sc)
+		if err != nil {
+			return nil, err
+		}
 		return s.ExchangeToken(ctx, p)
 	}
 }

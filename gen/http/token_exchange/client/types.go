@@ -9,6 +9,7 @@ package client
 
 import (
 	tokenexchange "k8s-federated-credential-api/gen/token_exchange"
+	"unicode/utf8"
 
 	goa "goa.design/goa/v3/pkg"
 )
@@ -16,12 +17,10 @@ import (
 // ExchangeTokenRequestBody is the type of the "tokenExchange" service
 // "exchangeToken" endpoint HTTP request body.
 type ExchangeTokenRequestBody struct {
-	// The JWT Token from the impersonating service account
-	JWT *string `form:"jwt,omitempty" json:"jwt,omitempty" xml:"jwt,omitempty"`
 	// The target namespace for impersonation
-	Namespace *string `form:"namespace,omitempty" json:"namespace,omitempty" xml:"namespace,omitempty"`
+	Namespace string `form:"namespace" json:"namespace" xml:"namespace"`
 	// The target serviceAccount
-	ServiceAccountName *string `form:"serviceAccountName,omitempty" json:"serviceAccountName,omitempty" xml:"serviceAccountName,omitempty"`
+	ServiceAccountName string `form:"serviceAccountName" json:"serviceAccountName" xml:"serviceAccountName"`
 }
 
 // ExchangeTokenResponseBody is the type of the "tokenExchange" service
@@ -29,6 +28,157 @@ type ExchangeTokenRequestBody struct {
 type ExchangeTokenResponseBody struct {
 	// The status information with a token
 	Status *StatusResponseBody `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
+}
+
+// ExchangeTokenInternalErrorResponseBody is the type of the "tokenExchange"
+// service "exchangeToken" endpoint HTTP response body for the "internal_error"
+// error.
+type ExchangeTokenInternalErrorResponseBody struct {
+	// Name is the name of this class of errors.
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+	// Is the error temporary?
+	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
+	// Is the error a timeout?
+	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
+	// Is the error a server-side fault?
+	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
+}
+
+// ExchangeTokenForbiddenResponseBody is the type of the "tokenExchange"
+// service "exchangeToken" endpoint HTTP response body for the "forbidden"
+// error.
+type ExchangeTokenForbiddenResponseBody struct {
+	// Name is the name of this class of errors.
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+	// Is the error temporary?
+	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
+	// Is the error a timeout?
+	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
+	// Is the error a server-side fault?
+	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
+}
+
+// ExchangeTokenNotFoundResponseBody is the type of the "tokenExchange" service
+// "exchangeToken" endpoint HTTP response body for the "not_found" error.
+type ExchangeTokenNotFoundResponseBody struct {
+	// Name is the name of this class of errors.
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+	// Is the error temporary?
+	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
+	// Is the error a timeout?
+	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
+	// Is the error a server-side fault?
+	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
+}
+
+// ExchangeTokenNotAcceptableResponseBody is the type of the "tokenExchange"
+// service "exchangeToken" endpoint HTTP response body for the "not_acceptable"
+// error.
+type ExchangeTokenNotAcceptableResponseBody struct {
+	// Name is the name of this class of errors.
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+	// Is the error temporary?
+	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
+	// Is the error a timeout?
+	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
+	// Is the error a server-side fault?
+	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
+}
+
+// ExchangeTokenUnauthorizedResponseBody is the type of the "tokenExchange"
+// service "exchangeToken" endpoint HTTP response body for the "unauthorized"
+// error.
+type ExchangeTokenUnauthorizedResponseBody struct {
+	// Name is the name of this class of errors.
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+	// Is the error temporary?
+	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
+	// Is the error a timeout?
+	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
+	// Is the error a server-side fault?
+	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
+}
+
+// ExchangeTokenBadRequestErrorResponseBody is the type of the "tokenExchange"
+// service "exchangeToken" endpoint HTTP response body for the
+// "bad_request_error" error.
+type ExchangeTokenBadRequestErrorResponseBody struct {
+	// Name is the name of this class of errors.
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+	// Is the error temporary?
+	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
+	// Is the error a timeout?
+	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
+	// Is the error a server-side fault?
+	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
+}
+
+// ExchangeTokenUnsupportedMediaTypeResponseBody is the type of the
+// "tokenExchange" service "exchangeToken" endpoint HTTP response body for the
+// "unsupported_media_type" error.
+type ExchangeTokenUnsupportedMediaTypeResponseBody struct {
+	// Name is the name of this class of errors.
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+	// Is the error temporary?
+	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
+	// Is the error a timeout?
+	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
+	// Is the error a server-side fault?
+	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
+}
+
+// ExchangeTokenTooManyRequestsResponseBody is the type of the "tokenExchange"
+// service "exchangeToken" endpoint HTTP response body for the
+// "too_many_requests" error.
+type ExchangeTokenTooManyRequestsResponseBody struct {
+	// Name is the name of this class of errors.
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+	// Is the error temporary?
+	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
+	// Is the error a timeout?
+	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
+	// Is the error a server-side fault?
+	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
 }
 
 // StatusResponseBody is used to define fields on response body types.
@@ -41,7 +191,6 @@ type StatusResponseBody struct {
 // the "exchangeToken" endpoint of the "tokenExchange" service.
 func NewExchangeTokenRequestBody(p *tokenexchange.ExchangeTokenPayload) *ExchangeTokenRequestBody {
 	body := &ExchangeTokenRequestBody{
-		JWT:                p.JWT,
 		Namespace:          p.Namespace,
 		ServiceAccountName: p.ServiceAccountName,
 	}
@@ -53,6 +202,126 @@ func NewExchangeTokenRequestBody(p *tokenexchange.ExchangeTokenPayload) *Exchang
 func NewExchangeTokenStatusResultOK(body *ExchangeTokenResponseBody) *tokenexchange.StatusResult {
 	v := &tokenexchange.StatusResult{}
 	v.Status = unmarshalStatusResponseBodyToTokenexchangeStatus(body.Status)
+
+	return v
+}
+
+// NewExchangeTokenInternalError builds a tokenExchange service exchangeToken
+// endpoint internal_error error.
+func NewExchangeTokenInternalError(body *ExchangeTokenInternalErrorResponseBody) *goa.ServiceError {
+	v := &goa.ServiceError{
+		Name:      *body.Name,
+		ID:        *body.ID,
+		Message:   *body.Message,
+		Temporary: *body.Temporary,
+		Timeout:   *body.Timeout,
+		Fault:     *body.Fault,
+	}
+
+	return v
+}
+
+// NewExchangeTokenForbidden builds a tokenExchange service exchangeToken
+// endpoint forbidden error.
+func NewExchangeTokenForbidden(body *ExchangeTokenForbiddenResponseBody) *goa.ServiceError {
+	v := &goa.ServiceError{
+		Name:      *body.Name,
+		ID:        *body.ID,
+		Message:   *body.Message,
+		Temporary: *body.Temporary,
+		Timeout:   *body.Timeout,
+		Fault:     *body.Fault,
+	}
+
+	return v
+}
+
+// NewExchangeTokenNotFound builds a tokenExchange service exchangeToken
+// endpoint not_found error.
+func NewExchangeTokenNotFound(body *ExchangeTokenNotFoundResponseBody) *goa.ServiceError {
+	v := &goa.ServiceError{
+		Name:      *body.Name,
+		ID:        *body.ID,
+		Message:   *body.Message,
+		Temporary: *body.Temporary,
+		Timeout:   *body.Timeout,
+		Fault:     *body.Fault,
+	}
+
+	return v
+}
+
+// NewExchangeTokenNotAcceptable builds a tokenExchange service exchangeToken
+// endpoint not_acceptable error.
+func NewExchangeTokenNotAcceptable(body *ExchangeTokenNotAcceptableResponseBody) *goa.ServiceError {
+	v := &goa.ServiceError{
+		Name:      *body.Name,
+		ID:        *body.ID,
+		Message:   *body.Message,
+		Temporary: *body.Temporary,
+		Timeout:   *body.Timeout,
+		Fault:     *body.Fault,
+	}
+
+	return v
+}
+
+// NewExchangeTokenUnauthorized builds a tokenExchange service exchangeToken
+// endpoint unauthorized error.
+func NewExchangeTokenUnauthorized(body *ExchangeTokenUnauthorizedResponseBody) *goa.ServiceError {
+	v := &goa.ServiceError{
+		Name:      *body.Name,
+		ID:        *body.ID,
+		Message:   *body.Message,
+		Temporary: *body.Temporary,
+		Timeout:   *body.Timeout,
+		Fault:     *body.Fault,
+	}
+
+	return v
+}
+
+// NewExchangeTokenBadRequestError builds a tokenExchange service exchangeToken
+// endpoint bad_request_error error.
+func NewExchangeTokenBadRequestError(body *ExchangeTokenBadRequestErrorResponseBody) *goa.ServiceError {
+	v := &goa.ServiceError{
+		Name:      *body.Name,
+		ID:        *body.ID,
+		Message:   *body.Message,
+		Temporary: *body.Temporary,
+		Timeout:   *body.Timeout,
+		Fault:     *body.Fault,
+	}
+
+	return v
+}
+
+// NewExchangeTokenUnsupportedMediaType builds a tokenExchange service
+// exchangeToken endpoint unsupported_media_type error.
+func NewExchangeTokenUnsupportedMediaType(body *ExchangeTokenUnsupportedMediaTypeResponseBody) *goa.ServiceError {
+	v := &goa.ServiceError{
+		Name:      *body.Name,
+		ID:        *body.ID,
+		Message:   *body.Message,
+		Temporary: *body.Temporary,
+		Timeout:   *body.Timeout,
+		Fault:     *body.Fault,
+	}
+
+	return v
+}
+
+// NewExchangeTokenTooManyRequests builds a tokenExchange service exchangeToken
+// endpoint too_many_requests error.
+func NewExchangeTokenTooManyRequests(body *ExchangeTokenTooManyRequestsResponseBody) *goa.ServiceError {
+	v := &goa.ServiceError{
+		Name:      *body.Name,
+		ID:        *body.ID,
+		Message:   *body.Message,
+		Temporary: *body.Temporary,
+		Timeout:   *body.Timeout,
+		Fault:     *body.Fault,
+	}
 
 	return v
 }
@@ -71,10 +340,210 @@ func ValidateExchangeTokenResponseBody(body *ExchangeTokenResponseBody) (err err
 	return
 }
 
+// ValidateExchangeTokenInternalErrorResponseBody runs the validations defined
+// on exchangeToken_internal_error_response_body
+func ValidateExchangeTokenInternalErrorResponseBody(body *ExchangeTokenInternalErrorResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.Temporary == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
+	}
+	if body.Timeout == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
+	}
+	if body.Fault == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	}
+	return
+}
+
+// ValidateExchangeTokenForbiddenResponseBody runs the validations defined on
+// exchangeToken_forbidden_response_body
+func ValidateExchangeTokenForbiddenResponseBody(body *ExchangeTokenForbiddenResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.Temporary == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
+	}
+	if body.Timeout == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
+	}
+	if body.Fault == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	}
+	return
+}
+
+// ValidateExchangeTokenNotFoundResponseBody runs the validations defined on
+// exchangeToken_not_found_response_body
+func ValidateExchangeTokenNotFoundResponseBody(body *ExchangeTokenNotFoundResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.Temporary == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
+	}
+	if body.Timeout == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
+	}
+	if body.Fault == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	}
+	return
+}
+
+// ValidateExchangeTokenNotAcceptableResponseBody runs the validations defined
+// on exchangeToken_not_acceptable_response_body
+func ValidateExchangeTokenNotAcceptableResponseBody(body *ExchangeTokenNotAcceptableResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.Temporary == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
+	}
+	if body.Timeout == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
+	}
+	if body.Fault == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	}
+	return
+}
+
+// ValidateExchangeTokenUnauthorizedResponseBody runs the validations defined
+// on exchangeToken_unauthorized_response_body
+func ValidateExchangeTokenUnauthorizedResponseBody(body *ExchangeTokenUnauthorizedResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.Temporary == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
+	}
+	if body.Timeout == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
+	}
+	if body.Fault == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	}
+	return
+}
+
+// ValidateExchangeTokenBadRequestErrorResponseBody runs the validations
+// defined on exchangeToken_bad_request_error_response_body
+func ValidateExchangeTokenBadRequestErrorResponseBody(body *ExchangeTokenBadRequestErrorResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.Temporary == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
+	}
+	if body.Timeout == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
+	}
+	if body.Fault == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	}
+	return
+}
+
+// ValidateExchangeTokenUnsupportedMediaTypeResponseBody runs the validations
+// defined on exchangeToken_unsupported_media_type_response_body
+func ValidateExchangeTokenUnsupportedMediaTypeResponseBody(body *ExchangeTokenUnsupportedMediaTypeResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.Temporary == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
+	}
+	if body.Timeout == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
+	}
+	if body.Fault == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	}
+	return
+}
+
+// ValidateExchangeTokenTooManyRequestsResponseBody runs the validations
+// defined on exchangeToken_too_many_requests_response_body
+func ValidateExchangeTokenTooManyRequestsResponseBody(body *ExchangeTokenTooManyRequestsResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.Temporary == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
+	}
+	if body.Timeout == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
+	}
+	if body.Fault == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	}
+	return
+}
+
 // ValidateStatusResponseBody runs the validations defined on StatusResponseBody
 func ValidateStatusResponseBody(body *StatusResponseBody) (err error) {
 	if body.Token == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("token", "body"))
+	}
+	if body.Token != nil {
+		err = goa.MergeErrors(err, goa.ValidatePattern("body.token", *body.Token, "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"))
+	}
+	if body.Token != nil {
+		if utf8.RuneCountInString(*body.Token) > 2000 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("body.token", *body.Token, utf8.RuneCountInString(*body.Token), 2000, false))
+		}
 	}
 	return
 }
