@@ -97,6 +97,8 @@ spec:
                 set -o nounset
                 set -o pipefail
 
+                export KO_DOCKER_REPO=registry.arthurvardevanyan.com/homelab/k8s-federated-credential-api
+
                 cd ${WORKSPACE_DATA_PATH}
                 git config --global --add safe.directory "${WORKSPACE_DATA_PATH}"
 

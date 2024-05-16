@@ -28,6 +28,7 @@
     "kfca",
     "livez",
     "metav",
+    "OIDC",
     "readyz",
     "serviceaccounts",
     "tokenexchange"
