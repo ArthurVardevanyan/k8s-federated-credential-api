@@ -2,7 +2,7 @@ kind: HorizontalPodAutoscaler
 apiVersion: autoscaling/v2
 metadata:
   name: k8s-federated-credential-api
-  namespace: k8s-federated-credential-api
+  namespace: k8s-federated-credential
 spec:
   scaleTargetRef:
     kind: Deployment

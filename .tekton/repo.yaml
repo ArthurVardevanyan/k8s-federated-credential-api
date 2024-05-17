@@ -4,7 +4,7 @@ apiVersion: pipelinesascode.tekton.dev/v1alpha1
 kind: Repository
 metadata:
   name: k8s-federated-credential-api
-  namespace: k8s-federated-credential-api
+  namespace: homelab
 spec:
   url: "https://github.com/ArthurVardevanyan/k8s-federated-credential-api"
   concurrency_limit: 3
