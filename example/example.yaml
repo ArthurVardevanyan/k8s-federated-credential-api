@@ -8,3 +8,4 @@ metadata:
     kfca_2: '{ "issuer": "https://storage.googleapis.com/okd-homelab-wif-oidc", "subject": "system:serviceaccount:default:test"}'
     kfca_3: '{ "issuer": "https://storage.googleapis.com/okd-homelab-wif-oidc", "subject": "system:serviceaccount:default:default"}'
     kfca_4: '{ "issuer": "https://storage.googleapis.com/okd-homelab-wif-oidc", "subject": "system:serviceaccount:default:test"}'
+    kfca_5: '{ "issuer": "https://storage.googleapis.com/k3s-homelab-wif-oidc", "subject": "system:serviceaccount:kubernetes-dashboard:admin-user"}'
