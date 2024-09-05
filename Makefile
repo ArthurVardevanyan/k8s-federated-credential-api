@@ -1,8 +1,8 @@
 
-# https://catalog.redhat.com/software/containers/ubi9/ubi-minimal/615bd9b4075b022acc111bf5?architecture=amd64&image=65e0932f034203e025b55a92
-export KO_DEFAULTBASEIMAGE=registry.access.redhat.com/ubi9-minimal:9.3-1612
+# https://catalog.redhat.com/software/containers/ubi9/ubi-minimal/615bd9b4075b022acc111bf5?architecture=amd64&image=66cddd84df3259c57ceb8f65
+export KO_DEFAULTBASEIMAGE=registry.access.redhat.com/ubi9-minimal:9.4-1227
 TAG ?= $(shell date --utc '+%Y%m%d-%H%M')
-EXPIRE ?= 1d
+EXPIRE ?= 180d
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
