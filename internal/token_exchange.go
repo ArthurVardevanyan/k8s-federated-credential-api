@@ -172,7 +172,7 @@ func kubernetesAuthToken(expirationSeconds int) *authenticationV1.TokenRequest {
 
 	tokenRequest := &authenticationV1.TokenRequest{
 		Spec: authenticationV1.TokenRequestSpec{
-			Audiences:         []string{"openshift"},
+			//Audiences:         []string{"openshift"},
 			ExpirationSeconds: &ExpirationSeconds,
 		},
 	}
