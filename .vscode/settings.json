@@ -29,8 +29,10 @@
     "livez",
     "metav",
     "OIDC",
+    "pipelinesascode",
     "readyz",
     "serviceaccounts",
+    "tekton",
     "tokenexchange"
-  ],
+  ]
 }
