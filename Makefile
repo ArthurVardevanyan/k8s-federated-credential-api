@@ -1,4 +1,6 @@
 
+WORKSPACE_RESULTS_PATH ?= /tmp/image
+export KO_DOCKER_REPO=registry.arthurvardevanyan.com/homelab/k8s-federated-credential-api
 # https://catalog.redhat.com/software/containers/ubi9/ubi-minimal/615bd9b4075b022acc111bf5?architecture=amd64&image=66cddd84df3259c57ceb8f65
 export KO_DEFAULTBASEIMAGE=registry.access.redhat.com/ubi9-minimal:9.4-1227
 TAG ?= $(shell date --utc '+%Y%m%d-%H%M')
@@ -39,3 +41,8 @@ run: build
 .PHONY: ko-build
 ko-build:
 	ko build ./cmd/kfca --platform=linux/amd64 --bare --sbom none --image-label quay.expires-after="${EXPIRE}" --tags "${TAG}"
+
+.PHONY: ko-build-pipeline
+ko-build-pipeline:
+	ko build ./cmd/kfca --platform=linux/amd64 --bare --sbom none --image-label quay.expires-after="${EXPIRE}" --tags "${TAG}"
+	echo "${KO_DOCKER_REPO}:${TAG}" > "${WORKSPACE_RESULTS_PATH}"
