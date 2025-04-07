@@ -1,10 +1,11 @@
 module k8s-federated-credential-api
 
 go 1.23.4
+
 toolchain go1.24.1
 
 require (
-	github.com/coreos/go-oidc/v3 v3.13.0
+	github.com/coreos/go-oidc/v3 v3.14.1
 	goa.design/goa/v3 v3.20.1
 	k8s.io/api v0.32.3
 	k8s.io/apimachinery v0.32.3
