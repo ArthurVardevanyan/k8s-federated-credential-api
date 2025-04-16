@@ -65,7 +65,7 @@ Example of target service account annotation can be found in `examples/example.y
 ```bash
 export JSON='{
   "namespace": "smoke-tests",
-  "ServiceAccountName": "default"
+  "serviceAccountName": "default"
 }'
 
 curl --header "Authorization: Bearer $(kubectl create token default --duration=1h -n default)"\
