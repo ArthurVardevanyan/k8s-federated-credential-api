@@ -8,6 +8,6 @@ metadata:
     pod-security.kubernetes.io/warn-version: latest
     pod-security.kubernetes.io/audit: restricted
     pod-security.kubernetes.io/audit-version: latest
-    app.kubernetes.io/instance: k8s-federated-credential-api
-    kubernetes.io/metadata.name: k8s-federated-credential-api
-  name: k8s-federated-credential-api
+    app.kubernetes.io/instance: k8s-federated-credential
+    kubernetes.io/metadata.name: k8s-federated-credential
+  name: k8s-federated-credential
