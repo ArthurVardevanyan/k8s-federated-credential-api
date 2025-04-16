@@ -40,9 +40,9 @@ run: build
 
 .PHONY: ko-build
 ko-build:
-	ko build ./cmd/kfca --platform=linux/amd64 --bare --sbom none --image-label quay.expires-after="${EXPIRE}" --tags "${TAG}"
+	ko build ./cmd/kfca --platform=linux/amd64,linux/arm64 --bare --sbom none --image-label quay.expires-after="${EXPIRE}" --tags "${TAG}"
 
 .PHONY: ko-build-pipeline
 ko-build-pipeline:
-	ko build ./cmd/kfca --platform=linux/amd64 --bare --sbom none --image-label quay.expires-after="${EXPIRE}" --tags "${TAG}"
+	ko build ./cmd/kfca --platform=linux/amd64,linux/arm64 --bare --sbom none --image-label quay.expires-after="${EXPIRE}" --tags "${TAG}"
 	echo "${KO_DOCKER_REPO}:${TAG}" > "${WORKSPACE_RESULTS_PATH}"
