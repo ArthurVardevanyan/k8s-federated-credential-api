@@ -33,7 +33,7 @@ pe "kubectl get serviceaccount -n default argocd -o yaml | kubectl neat | yq"
 
 wait
 
-export KUBECONFIG=~/.kube/microshift
+export KUBECONFIG=~/.kube/okd
 
 pe "kubectl get nodes"
 
