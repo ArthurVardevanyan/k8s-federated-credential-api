@@ -4,7 +4,7 @@ kind: PipelineRun
 metadata:
   name: k8s-federated-credential-api
   annotations:
-    # io.kubernetes.cri-o.TrySkipVolumeSELinuxLabel: "true" 
+    # io.kubernetes.cri-o.TrySkipVolumeSELinuxLabel: "true"
     pipelinesascode.tekton.dev/on-event: "[pull_request]"
     pipelinesascode.tekton.dev/on-target-branch: "[main]"
     pipelinesascode.tekton.dev/max-keep-runs: "1"
@@ -102,7 +102,11 @@ spec:
                   value: $(results.IMAGE.path)
               volumeMounts:
                 - name: cache
+                  mountPath: /go/pkg
+                  subpath: go
+                - name: cache
                   mountPath: /tmp
+                  subpath: tmp
               script: |
                 set -o errexit
                 set -o nounset
@@ -126,13 +130,13 @@ spec:
         params:
           - name: IMAGE
             value: $(tasks.test-build.results.IMAGE)
-            
+
   taskRunTemplate:
     serviceAccountName: pipeline
     podTemplate:
       # runtimeClassName: selinux
       securityContext:
-        fsGroupChangePolicy: OnRootMismatch 
+        fsGroupChangePolicy: OnRootMismatch
   workspaces:
     - name: data
       volumeClaimTemplate:
