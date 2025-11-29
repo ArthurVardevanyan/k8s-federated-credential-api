@@ -5,7 +5,7 @@ go 1.24.0
 toolchain go1.24.1
 
 require (
-	github.com/coreos/go-oidc/v3 v3.16.0
+	github.com/coreos/go-oidc/v3 v3.17.0
 	goa.design/goa/v3 v3.22.6
 	k8s.io/api v0.34.2
 	k8s.io/apimachinery v0.34.2
