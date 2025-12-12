@@ -3,7 +3,7 @@ WORKSPACE_RESULTS_PATH ?= /tmp/image
 export KO_DOCKER_REPO=registry.arthurvardevanyan.com/homelab/k8s-federated-credential-api
 # https://catalog.redhat.com/software/containers/ubi9/ubi-minimal/615bd9b4075b022acc111bf5?architecture=amd64&image=66cddd84df3259c57ceb8f65
 export KO_DEFAULTBASEIMAGE=cgr.dev/chainguard/static:latest
-TAG ?= $(shell date --utc '+%Y%m%d-%H%M')
+TAG ?= $(shell date --utc '+"%Y.%m.%d.%H%M%S"'-local)
 EXPIRE ?= 180d
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
