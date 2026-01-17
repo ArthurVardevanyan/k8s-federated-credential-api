@@ -2,7 +2,7 @@ module k8s-federated-credential-api
 
 go 1.25.0
 
-toolchain go1.25.5
+toolchain go1.25.6
 
 require (
 	github.com/coreos/go-oidc/v3 v3.17.0
