@@ -6,7 +6,7 @@ toolchain go1.25.7
 
 require (
 	github.com/coreos/go-oidc/v3 v3.17.0
-	goa.design/goa/v3 v3.24.2
+	goa.design/goa/v3 v3.24.3
 	k8s.io/api v0.35.0
 	k8s.io/apimachinery v0.35.0
 	k8s.io/client-go v0.35.0
