@@ -1,26 +1,33 @@
 package kfca
 
 import (
-	"context"
-	readyz "k8s-federated-credential-api/gen/readyz"
+	"encoding/json"
 	"log"
+	"net/http"
 )
 
-// readyz service example implementation.
-// The example methods log the requests and return zero values.
+type ReadyzResult struct {
+	Ready bool `json:"ready"`
+}
+
 type readyzsrvc struct {
 	logger *log.Logger
 }
 
-// NewReadyz returns the readyz service implementation.
-func NewReadyz(logger *log.Logger) readyz.Service {
-	return &readyzsrvc{logger}
+func NewReadyzHandler(logger *log.Logger) http.HandlerFunc {
+	s := &readyzsrvc{logger: logger}
+	return s.ServeHTTP
 }
 
-// Readyz implements readyz.
-func (s *readyzsrvc) Readyz(ctx context.Context) (res *readyz.ReadyzResult, err error) {
-	res = &readyz.ReadyzResult{}
-	res.Ready = true
+func (s *readyzsrvc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
 
-	return res, nil
+	res := &ReadyzResult{Ready: true}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(res)
 }

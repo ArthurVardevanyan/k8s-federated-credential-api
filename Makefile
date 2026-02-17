@@ -19,18 +19,6 @@ endif
 SHELL = /usr/bin/env bash -o pipefail
 .SHELLFLAGS = -ec
 
-.PHONY: goa-gen
-goa-gen:
-	~/go/bin/goa gen k8s-federated-credential-api/design && \
-	jq -c '.components.schemas.ExchangeTokenRequestBody += {"additionalProperties":false}' gen/http/openapi3.json > gen/http/tmp.json && mv gen/http/tmp.json  gen/http/openapi3.json
-	yq -i '.components.schemas.ExchangeTokenRequestBody.additionalProperties += false' gen/http/openapi3.yaml
-	jq -c '.components.schemas.StatusResult += {"additionalProperties":false}' gen/http/openapi3.json > gen/http/tmp.json && mv gen/http/tmp.json  gen/http/openapi3.json
-	yq -i '.components.schemas.StatusResult.additionalProperties += false' gen/http/openapi3.yaml
-	jq -c '.components.schemas.Status += {"additionalProperties":false}' gen/http/openapi3.json > gen/http/tmp.json && mv gen/http/tmp.json  gen/http/openapi3.json
-	yq -i '.components.schemas.Status.additionalProperties += false' gen/http/openapi3.yaml
-	jq -c '.components.schemas.Error += {"additionalProperties":false}' gen/http/openapi3.json > gen/http/tmp.json && mv gen/http/tmp.json  gen/http/openapi3.json
-	yq -i '.components.schemas.Error.additionalProperties += false' gen/http/openapi3.yaml
-
 .PHONY: build
 build:
 	go build -C cmd/kfca -o /tmp/kfca
