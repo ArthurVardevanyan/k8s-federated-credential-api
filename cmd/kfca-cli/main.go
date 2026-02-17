@@ -1,120 +1,106 @@
 package main
 
 import (
-	"context"
+	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
-	"net/url"
+	"io"
+	"net/http"
 	"os"
-	"strings"
-
-	goa "goa.design/goa/v3/pkg"
+	"time"
 )
+
+type ExchangeTokenRequest struct {
+	Namespace          string `json:"namespace"`
+	ServiceAccountName string `json:"serviceAccountName"`
+}
 
 func main() {
 	var (
-		hostF = flag.String("host", "localhost", "Server host (valid values: localhost)")
-		addrF = flag.String("url", "", "URL to service host")
-
-		verboseF = flag.Bool("verbose", false, "Print request and response details")
-		vF       = flag.Bool("v", false, "Print request and response details")
-		timeoutF = flag.Int("timeout", 30, "Maximum number of seconds to wait for response")
+		urlF       = flag.String("url", "http://0.0.0.0:8088", "URL to service host")
+		tokenF     = flag.String("token", "", "Bearer token for authentication")
+		namespaceF = flag.String("namespace", "", "Target namespace for impersonation")
+		saNameF    = flag.String("service-account", "", "Target service account name")
+		timeoutF   = flag.Int("timeout", 30, "Maximum number of seconds to wait for response")
 	)
-	flag.Usage = usage
-	flag.Parse()
-	var (
-		addr    string
-		timeout int
-		debug   bool
-	)
-	{
-		addr = *addrF
-		if addr == "" {
-			switch *hostF {
-			case "localhost":
-				addr = "http://0.0.0.0:8088"
-			default:
-				fmt.Fprintf(os.Stderr, "invalid host argument: %q (valid hosts: localhost)\n", *hostF)
-				os.Exit(1)
-			}
-		}
-		timeout = *timeoutF
-		debug = *verboseF || *vF
-	}
-
-	var (
-		scheme string
-		host   string
-	)
-	{
-		u, err := url.Parse(addr)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "invalid URL %#v: %s\n", addr, err)
-			os.Exit(1)
-		}
-		scheme = u.Scheme
-		host = u.Host
-	}
-	var (
-		endpoint goa.Endpoint
-		payload  any
-		err      error
-	)
-	{
-		switch scheme {
-		case "http", "https":
-			endpoint, payload, err = doHTTP(scheme, host, timeout, debug)
-		default:
-			fmt.Fprintf(os.Stderr, "invalid scheme: %q (valid schemes: http)\n", scheme)
-			os.Exit(1)
-		}
-	}
-	if err != nil {
-		if err == flag.ErrHelp {
-			os.Exit(0)
-		}
-		fmt.Fprintln(os.Stderr, err.Error())
-		fmt.Fprintln(os.Stderr, "run '"+os.Args[0]+" --help' for detailed usage.")
-		os.Exit(1)
-	}
-
-	data, err := endpoint(context.Background(), payload)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		os.Exit(1)
-	}
-
-	if data != nil {
-		m, _ := json.MarshalIndent(data, "", "    ")
-		fmt.Println(string(m))
-	}
-}
-
-func usage() {
-	fmt.Fprintf(os.Stderr, `%s is a command line client for the kfca API.
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, `kfca-cli is a command line client for the Kubernetes Federated Credential API.
 
 Usage:
-    %s [-host HOST][-url URL][-timeout SECONDS][-verbose|-v] SERVICE ENDPOINT [flags]
+    %s [flags]
 
-    -host HOST:  server host (localhost). valid values: localhost
-    -url URL:    specify service URL overriding host URL (http://localhost:8080)
-    -timeout:    maximum number of seconds to wait for response (30)
-    -verbose|-v: print request and response details (false)
-
-Commands:
-%s
-Additional help:
-    %s SERVICE [ENDPOINT] --help
-
+Flags:
+`, os.Args[0])
+		flag.PrintDefaults()
+		fmt.Fprintf(os.Stderr, `
 Example:
-%s
-`, os.Args[0], os.Args[0], indent(httpUsageCommands()), os.Args[0], indent(httpUsageExamples()))
-}
-
-func indent(s string) string {
-	if s == "" {
-		return ""
+    %s -url http://localhost:8088 -token "$(kubectl create token default --duration=1h -n default)" -namespace smoke-tests -service-account default
+`, os.Args[0])
 	}
-	return "    " + strings.Replace(s, "\n", "\n    ", -1)
+	flag.Parse()
+
+	if *tokenF == "" {
+		fmt.Fprintln(os.Stderr, "error: -token is required")
+		flag.Usage()
+		os.Exit(1)
+	}
+	if *namespaceF == "" {
+		fmt.Fprintln(os.Stderr, "error: -namespace is required")
+		flag.Usage()
+		os.Exit(1)
+	}
+	if *saNameF == "" {
+		fmt.Fprintln(os.Stderr, "error: -service-account is required")
+		flag.Usage()
+		os.Exit(1)
+	}
+
+	reqBody := ExchangeTokenRequest{
+		Namespace:          *namespaceF,
+		ServiceAccountName: *saNameF,
+	}
+
+	body, err := json.Marshal(reqBody)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error marshalling request: %v\n", err)
+		os.Exit(1)
+	}
+
+	client := &http.Client{Timeout: time.Duration(*timeoutF) * time.Second}
+
+	req, err := http.NewRequest(http.MethodPost, *urlF+"/exchangeToken", bytes.NewReader(body))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error creating request: %v\n", err)
+		os.Exit(1)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Authorization", "Bearer "+*tokenF)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error sending request: %v\n", err)
+		os.Exit(1)
+	}
+	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error reading response: %v\n", err)
+		os.Exit(1)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		fmt.Fprintf(os.Stderr, "error: server returned %s\n%s\n", resp.Status, string(respBody))
+		os.Exit(1)
+	}
+
+	// Pretty-print the JSON response
+	var out bytes.Buffer
+	if err := json.Indent(&out, respBody, "", "    "); err != nil {
+		fmt.Println(string(respBody))
+	} else {
+		fmt.Println(out.String())
+	}
 }

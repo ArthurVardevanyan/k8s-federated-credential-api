@@ -1,25 +1,33 @@
 package kfca
 
 import (
-	"context"
-	livez "k8s-federated-credential-api/gen/livez"
+	"encoding/json"
 	"log"
+	"net/http"
 )
 
-// livez service example implementation.
-// The example methods log the requests and return zero values.
+type LivezResult struct {
+	Live bool `json:"live"`
+}
+
 type livezsrvc struct {
 	logger *log.Logger
 }
 
-// NewLivez returns the livez service implementation.
-func NewLivez(logger *log.Logger) livez.Service {
-	return &livezsrvc{logger}
+func NewLivezHandler(logger *log.Logger) http.HandlerFunc {
+	s := &livezsrvc{logger: logger}
+	return s.ServeHTTP
 }
 
-// Livez implements livez.
-func (s *livezsrvc) Livez(ctx context.Context) (res *livez.LivezResult, err error) {
-	res = &livez.LivezResult{}
-	res.Live = true
-	return res, nil
+func (s *livezsrvc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	res := &LivezResult{Live: true}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(res)
 }

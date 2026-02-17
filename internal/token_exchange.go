@@ -4,19 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	tokenexchange "k8s-federated-credential-api/gen/token_exchange"
 	"log"
+	"net/http"
 	"strings"
 
-	"goa.design/goa/v3/security"
+	"github.com/coreos/go-oidc/v3/oidc"
 
 	authenticationV1 "k8s.io/api/authentication/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-
-	"github.com/coreos/go-oidc/v3/oidc"
 )
 
 type ServiceAccountInfo struct {
@@ -24,68 +22,123 @@ type ServiceAccountInfo struct {
 	Subject string `json:"subject"`
 }
 
-// tokenExchange service example implementation.
-// The example methods log the requests and return zero values.
+type ExchangeTokenRequest struct {
+	Namespace          string `json:"namespace"`
+	ServiceAccountName string `json:"serviceAccountName"`
+}
+
+type Status struct {
+	Token string `json:"token"`
+}
+
+type StatusResult struct {
+	Status *Status `json:"status"`
+}
+
+type ErrorResponse struct {
+	Name    string `json:"name"`
+	ID      string `json:"id"`
+	Message string `json:"message"`
+}
+
 type tokenExchangesrvc struct {
 	logger *log.Logger
 }
 
-// NewTokenExchange returns the tokenExchange service implementation.
-func NewTokenExchange(logger *log.Logger) tokenexchange.Service {
-	return &tokenExchangesrvc{logger}
+func NewTokenExchangeHandler(logger *log.Logger) http.HandlerFunc {
+	s := &tokenExchangesrvc{logger: logger}
+	return s.ServeHTTP
 }
 
-// JWTAuth implements the authorization logic for service "tokenExchange" for
-// the "jwt" security scheme.
-func (s *tokenExchangesrvc) JWTAuth(ctx context.Context, token string, scheme *security.JWTScheme) (context.Context, error) {
-
-	if token == "" {
-		return ctx, tokenexchange.MakeForbidden(fmt.Errorf("missing token"))
-	} else {
-		return ctx, nil
+func (s *tokenExchangesrvc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "Method Not Allowed")
+		return
 	}
-}
-
-// ExchangeToken implements exchangeToken.
-func (s *tokenExchangesrvc) ExchangeToken(ctx context.Context, p *tokenexchange.ExchangeTokenPayload) (res *tokenexchange.StatusResult, err error) {
 
 	// Check content-type of incoming request
-	ct, ok := ctx.Value("Content-Type").(string)
-	if !ok {
-		return nil, tokenexchange.MakeBadRequestError(fmt.Errorf("Content-Type header must be application/json"))
+	ct := r.Header.Get("Content-Type")
+	if ct == "" {
+		writeError(w, http.StatusBadRequest, "bad_request", "Content-Type header must be application/json")
+		return
 	}
-
 	if ct != "application/json" {
-		return nil, tokenexchange.MakeUnsupportedMediaType(fmt.Errorf("Content-Type header must be application/json"))
+		writeError(w, http.StatusUnsupportedMediaType, "unsupported_media_type", "Content-Type header must be application/json")
+		return
 	}
 
-	const hourSeconds = 3600
-	res = &tokenexchange.StatusResult{
-		Status: &tokenexchange.Status{
-			Token: "", // Your desired token value
-		},
+	// Check Authorization header
+	authorization := r.Header.Get("Authorization")
+	if authorization == "" {
+		writeError(w, http.StatusForbidden, "forbidden", "missing token")
+		return
 	}
+
+	// Validate Bearer prefix
+	if !strings.HasPrefix(authorization, "Bearer ") {
+		writeError(w, http.StatusBadRequest, "bad_request", "Authorization header must start with 'Bearer '")
+		return
+	}
+	token := strings.TrimPrefix(authorization, "Bearer ")
+	if len(authorization) > 2000 {
+		writeError(w, http.StatusBadRequest, "bad_request", "Authorization token too long")
+		return
+	}
+
+	// Decode request body
+	var req ExchangeTokenRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", "invalid request body: "+err.Error())
+		return
+	}
+
+	if req.Namespace == "" {
+		writeError(w, http.StatusBadRequest, "bad_request", "namespace is required")
+		return
+	}
+	if req.ServiceAccountName == "" {
+		writeError(w, http.StatusBadRequest, "bad_request", "serviceAccountName is required")
+		return
+	}
+	if len(req.Namespace) > 253 {
+		writeError(w, http.StatusBadRequest, "bad_request", "namespace too long")
+		return
+	}
+	if len(req.ServiceAccountName) > 253 {
+		writeError(w, http.StatusBadRequest, "bad_request", "serviceAccountName too long")
+		return
+	}
+
+	res, statusCode, err := s.exchangeToken(r.Context(), token, &req)
+	if err != nil {
+		writeError(w, statusCode, "error", err.Error())
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(res)
+}
+
+func (s *tokenExchangesrvc) exchangeToken(ctx context.Context, authorization string, req *ExchangeTokenRequest) (*StatusResult, int, error) {
+	const hourSeconds = 3600
 
 	s.logger.Print("tokenExchange.exchangeToken")
 
 	// creates the in-cluster config
 	config, err := rest.InClusterConfig()
 	if err != nil {
-		return res, tokenexchange.MakeInternalError(err)
+		return nil, http.StatusInternalServerError, fmt.Errorf("internal server error")
 	}
 	// creates the clientSet
 	clientSet, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		//return err.Error(), err
-		return res, tokenexchange.MakeInternalError(err)
-
+		return nil, http.StatusInternalServerError, fmt.Errorf("internal server error")
 	}
 
-	serviceAccount, err := clientSet.CoreV1().ServiceAccounts(p.Namespace).Get(ctx, p.ServiceAccountName, metav1.GetOptions{})
+	serviceAccount, err := clientSet.CoreV1().ServiceAccounts(req.Namespace).Get(ctx, req.ServiceAccountName, metav1.GetOptions{})
 	if err != nil {
-		//return "service Account Not Found. Error: %v", err
-		return res, tokenexchange.MakeNotFound(err)
-
+		return nil, http.StatusNotFound, fmt.Errorf("service account not found")
 	}
 
 	annotations := serviceAccount.GetAnnotations()
@@ -97,16 +150,13 @@ func (s *tokenExchangesrvc) ExchangeToken(ctx context.Context, p *tokenexchange.
 			var serviceAccountInfo ServiceAccountInfo
 			err := json.Unmarshal(jsonData, &serviceAccountInfo)
 			if err != nil {
-				//return "Error un-marshalling JSON:", err
-				return res, tokenexchange.MakeInternalError(err)
+				return nil, http.StatusInternalServerError, fmt.Errorf("internal server error")
 			}
 
 			provider, err := oidc.NewProvider(ctx, serviceAccountInfo.Issuer)
 			if err != nil {
 				// If Log Level Debug
-				//println(err.Error())
 				continue
-				// return "Unable to Reach Bucket:", err
 			}
 
 			oidcConfig := &oidc.Config{
@@ -114,12 +164,10 @@ func (s *tokenExchangesrvc) ExchangeToken(ctx context.Context, p *tokenexchange.
 			}
 			verifier := provider.Verifier(oidcConfig)
 
-			idToken, err := verifier.Verify(ctx, p.Authorization)
+			idToken, err := verifier.Verify(ctx, authorization)
 			if err != nil {
 				// If Log Level Debug
-				//println(err.Error())
 				continue
-				// return "Failed to parse the JWT.\nError: %s", err
 			}
 
 			// Extract claims from the ID token
@@ -140,31 +188,28 @@ func (s *tokenExchangesrvc) ExchangeToken(ctx context.Context, p *tokenexchange.
 			}
 			if err := idToken.Claims(&claims); err != nil {
 				continue
-				// return "Failed to extract claims: %v", err
 			}
 
 			if (claims.Exp - claims.Iat) > hourSeconds {
-				return res, fmt.Errorf("only tokens with a validity of one hour or less or accepted")
+				return nil, http.StatusBadRequest, fmt.Errorf("only tokens with a validity of one hour or less are accepted")
 			}
 
 			if claims.Iss == serviceAccountInfo.Issuer && claims.Sub == serviceAccountInfo.Subject {
 				tokenRequest := kubernetesAuthToken(hourSeconds)
-				token, err := clientSet.CoreV1().ServiceAccounts(p.Namespace).CreateToken(ctx, p.ServiceAccountName, tokenRequest, metav1.CreateOptions{})
+				token, err := clientSet.CoreV1().ServiceAccounts(req.Namespace).CreateToken(ctx, req.ServiceAccountName, tokenRequest, metav1.CreateOptions{})
 				if err != nil {
-					//res.Token = "Failed to create token: %v" + err.Error()
-					//return res, tokenexchange.MakeInternalError(err)
 					continue
 				}
 
-				res.Status.Token = token.Status.Token
-				return res, nil
-			} else {
-				// If Log Level Debug
-				//println(claims.Iss == serviceAccountInfo.Issuer && claims.Sub == serviceAccountInfo.Subject)
+				return &StatusResult{
+					Status: &Status{
+						Token: token.Status.Token,
+					},
+				}, http.StatusOK, nil
 			}
 		}
 	}
-	return res, tokenexchange.MakeNotFound(fmt.Errorf("no matching binding found"))
+	return nil, http.StatusNotFound, fmt.Errorf("no matching binding found")
 }
 
 func kubernetesAuthToken(expirationSeconds int) *authenticationV1.TokenRequest {
@@ -172,10 +217,19 @@ func kubernetesAuthToken(expirationSeconds int) *authenticationV1.TokenRequest {
 
 	tokenRequest := &authenticationV1.TokenRequest{
 		Spec: authenticationV1.TokenRequestSpec{
-			//Audiences:         []string{"openshift"},
 			ExpirationSeconds: &ExpirationSeconds,
 		},
 	}
 
 	return tokenRequest
+}
+
+func writeError(w http.ResponseWriter, statusCode int, name string, message string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(ErrorResponse{
+		Name:    name,
+		ID:      http.StatusText(statusCode),
+		Message: message,
+	})
 }
