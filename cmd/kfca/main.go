@@ -22,10 +22,13 @@ func main() {
 	)
 	flag.Parse()
 
+	debug := os.Getenv("KFCA_DEBUG") == "true"
+
 	logger := log.New(os.Stderr, "[kfca] ", log.Ltime)
+	logger.Printf("debug mode: %v", debug)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/exchangeToken", kfca.NewTokenExchangeHandler(logger))
+	mux.HandleFunc("/exchangeToken", kfca.NewTokenExchangeHandler(logger, debug))
 	mux.HandleFunc("/readyz", kfca.NewReadyzHandler(logger))
 	mux.HandleFunc("/livez", kfca.NewLivezHandler(logger))
 

@@ -43,10 +43,11 @@ type ErrorResponse struct {
 
 type tokenExchangesrvc struct {
 	logger *log.Logger
+	debug  bool
 }
 
-func NewTokenExchangeHandler(logger *log.Logger) http.HandlerFunc {
-	s := &tokenExchangesrvc{logger: logger}
+func NewTokenExchangeHandler(logger *log.Logger, debug bool) http.HandlerFunc {
+	s := &tokenExchangesrvc{logger: logger, debug: debug}
 	return s.ServeHTTP
 }
 
@@ -138,10 +139,19 @@ func (s *tokenExchangesrvc) exchangeToken(ctx context.Context, authorization str
 
 	serviceAccount, err := clientSet.CoreV1().ServiceAccounts(req.Namespace).Get(ctx, req.ServiceAccountName, metav1.GetOptions{})
 	if err != nil {
+		if s.debug {
+			s.logger.Printf("debug: failed to get service account %s/%s: %v", req.Namespace, req.ServiceAccountName, err)
+		}
 		return nil, http.StatusNotFound, fmt.Errorf("service account not found")
 	}
 
 	annotations := serviceAccount.GetAnnotations()
+	if s.debug {
+		s.logger.Printf("debug: service account %s/%s has %d annotations", req.Namespace, req.ServiceAccountName, len(annotations))
+		for key := range annotations {
+			s.logger.Printf("debug: annotation key: %q", key)
+		}
+	}
 	for key, value := range annotations {
 		if strings.Contains(key, "kfca") {
 
@@ -155,7 +165,9 @@ func (s *tokenExchangesrvc) exchangeToken(ctx context.Context, authorization str
 
 			provider, err := oidc.NewProvider(ctx, serviceAccountInfo.Issuer)
 			if err != nil {
-				// If Log Level Debug
+				if s.debug {
+					s.logger.Printf("debug: annotation %q: failed to create OIDC provider for issuer %q: %v", key, serviceAccountInfo.Issuer, err)
+				}
 				continue
 			}
 
@@ -166,7 +178,9 @@ func (s *tokenExchangesrvc) exchangeToken(ctx context.Context, authorization str
 
 			idToken, err := verifier.Verify(ctx, authorization)
 			if err != nil {
-				// If Log Level Debug
+				if s.debug {
+					s.logger.Printf("debug: annotation %q: token verification failed for issuer %q: %v", key, serviceAccountInfo.Issuer, err)
+				}
 				continue
 			}
 
@@ -187,6 +201,9 @@ func (s *tokenExchangesrvc) exchangeToken(ctx context.Context, authorization str
 				Sub string `json:"sub"`
 			}
 			if err := idToken.Claims(&claims); err != nil {
+				if s.debug {
+					s.logger.Printf("debug: annotation %q: failed to extract claims: %v", key, err)
+				}
 				continue
 			}
 
@@ -198,6 +215,9 @@ func (s *tokenExchangesrvc) exchangeToken(ctx context.Context, authorization str
 				tokenRequest := kubernetesAuthToken(hourSeconds)
 				token, err := clientSet.CoreV1().ServiceAccounts(req.Namespace).CreateToken(ctx, req.ServiceAccountName, tokenRequest, metav1.CreateOptions{})
 				if err != nil {
+					if s.debug {
+						s.logger.Printf("debug: annotation %q: failed to create token for %s/%s: %v", key, req.Namespace, req.ServiceAccountName, err)
+					}
 					continue
 				}
 
@@ -206,6 +226,8 @@ func (s *tokenExchangesrvc) exchangeToken(ctx context.Context, authorization str
 						Token: token.Status.Token,
 					},
 				}, http.StatusOK, nil
+			} else if s.debug {
+				s.logger.Printf("debug: annotation %q: issuer/subject mismatch: got iss=%q sub=%q, want iss=%q sub=%q", key, claims.Iss, claims.Sub, serviceAccountInfo.Issuer, serviceAccountInfo.Subject)
 			}
 		}
 	}
