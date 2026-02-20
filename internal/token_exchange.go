@@ -139,6 +139,9 @@ func (s *tokenExchangesrvc) exchangeToken(ctx context.Context, authorization str
 
 	serviceAccount, err := clientSet.CoreV1().ServiceAccounts(req.Namespace).Get(ctx, req.ServiceAccountName, metav1.GetOptions{})
 	if err != nil {
+		if s.debug {
+			s.logger.Printf("debug: failed to get service account %s/%s: %v", req.Namespace, req.ServiceAccountName, err)
+		}
 		return nil, http.StatusNotFound, fmt.Errorf("service account not found")
 	}
 

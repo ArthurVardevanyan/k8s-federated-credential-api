@@ -25,6 +25,7 @@ func main() {
 	debug := os.Getenv("KFCA_DEBUG") == "true"
 
 	logger := log.New(os.Stderr, "[kfca] ", log.Ltime)
+	logger.Printf("debug mode: %v", debug)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/exchangeToken", kfca.NewTokenExchangeHandler(logger, debug))
