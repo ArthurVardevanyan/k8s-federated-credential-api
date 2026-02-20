@@ -143,6 +143,12 @@ func (s *tokenExchangesrvc) exchangeToken(ctx context.Context, authorization str
 	}
 
 	annotations := serviceAccount.GetAnnotations()
+	if s.debug {
+		s.logger.Printf("debug: service account %s/%s has %d annotations", req.Namespace, req.ServiceAccountName, len(annotations))
+		for key := range annotations {
+			s.logger.Printf("debug: annotation key: %q", key)
+		}
+	}
 	for key, value := range annotations {
 		if strings.Contains(key, "kfca") {
 
