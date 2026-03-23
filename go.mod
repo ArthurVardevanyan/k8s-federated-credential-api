@@ -4,9 +4,9 @@ go 1.25.7
 
 require (
 	github.com/coreos/go-oidc/v3 v3.17.0
-	k8s.io/api v0.35.2
-	k8s.io/apimachinery v0.35.2
-	k8s.io/client-go v0.35.2
+	k8s.io/api v0.35.3
+	k8s.io/apimachinery v0.35.3
+	k8s.io/client-go v0.35.3
 )
 
 require (
